@@ -306,29 +306,29 @@ const ConsoleItem = (props: any) => {
           />
         </View>
 
-        {/* Metadata chip tags */}
-        <View style={[styles.metaRow, isLandscape && styles.metaRowLandscape]}>
-          <View
-            style={[
-              styles.techTag,
-              isLandscape && styles.techTagLandscape,
-              theme.dark ? styles.techTagDark : styles.techTagLight,
-            ]}>
-            <Icon
-              source="microsoft-xbox"
-              size={isLandscape ? 11 : 13}
-              color={theme.dark ? '#6EEB83' : '#107C10'}
-            />
-            <Text
+        {/* Metadata chip tags (vertical only to prevent crowding in landscape 1:1 card) */}
+        {!isLandscape && (
+          <View style={styles.metaRow}>
+            <View
               style={[
-                styles.techTagText,
-                isLandscape && styles.techTagTextLandscape,
-                theme.dark ? styles.techTagTextDark : styles.techTagTextLight,
+                styles.techTag,
+                theme.dark ? styles.techTagDark : styles.techTagLight,
               ]}>
-              {consoleItem.consoleType || 'Xbox'}
-            </Text>
+              <Icon
+                source="microsoft-xbox"
+                size={13}
+                color={theme.dark ? '#6EEB83' : '#107C10'}
+              />
+              <Text
+                style={[
+                  styles.techTagText,
+                  theme.dark ? styles.techTagTextDark : styles.techTagLight,
+                ]}>
+                {consoleItem.consoleType || 'Xbox'}
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Action Button */}
         <View style={[styles.footer, isLandscape && styles.footerLandscape]}>
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     minHeight: 120,
   },
   imageContainerLandscape: {
-    minHeight: 52,
+    minHeight: 48,
     marginVertical: 1,
   },
   consoleImage: {
@@ -610,8 +610,8 @@ const styles = StyleSheet.create({
     height: 145,
   },
   consoleImageLandscape: {
-    width: 65,
-    height: 50,
+    width: 60,
+    height: 46,
   },
   svgWrapper: {
     width: 120,
@@ -750,11 +750,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   streamButtonContentLandscape: {
-    minHeight: 38,
+    minHeight: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
   },
   streamButtonLabel: {
     fontSize: 13,
@@ -765,7 +765,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   streamButtonLabelLandscape: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     letterSpacing: 0.2,
     marginVertical: 0,

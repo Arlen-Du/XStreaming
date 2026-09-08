@@ -1350,7 +1350,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   consoleItemLandscape: {
-    paddingVertical: 4,
+    paddingVertical: 2,
     paddingHorizontal: 0,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1393,7 +1393,7 @@ const styles = StyleSheet.create({
   moreItemsLandscape: {
     paddingHorizontal: 16,
     paddingBottom: 12,
-    marginTop: 6,
+    marginTop: 8,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-start',
