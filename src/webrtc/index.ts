@@ -575,6 +575,7 @@ class webRTCClient {
         decode: '',
         bytesReceived: 0,
         bytesSent: 0,
+        connectionType: '',
       };
       if (this._webrtcClient) {
         this._webrtcClient
@@ -583,8 +584,13 @@ class webRTCClient {
             let totalInboundBytes = 0;
             let candidateBytesReceived = 0;
             let candidateBytesSent = 0;
+            const remoteCandidates: Record<string, any> = {};
+            let activeCandidatePair: any = null;
 
             stats.forEach((stat: any) => {
+              if (stat.type === 'remote-candidate') {
+                remoteCandidates[stat.id] = stat;
+              }
               if (stat.type === 'inbound-rtp') {
                 if (typeof stat.bytesReceived === 'number') {
                   totalInboundBytes += stat.bytesReceived;
@@ -692,6 +698,7 @@ class webRTCClient {
                   stat.type === 'candidate-pair' &&
                   stat.state === 'succeeded'
                 ) {
+                  activeCandidatePair = stat;
                   // Round Trip Time
                   const roundTripTime =
                     typeof stat.currentRoundTripTime !== 'undefined'
@@ -714,6 +721,25 @@ class webRTCClient {
                 }
               }
             });
+
+            if (
+              activeCandidatePair &&
+              activeCandidatePair.remoteCandidateId &&
+              remoteCandidates[activeCandidatePair.remoteCandidateId]
+            ) {
+              const remote =
+                remoteCandidates[activeCandidatePair.remoteCandidateId];
+              const ip = remote.address || remote.ip || '';
+              const isPrivate =
+                /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|fc00:|fe80:)/i.test(
+                  ip,
+                );
+              if (remote.candidateType === 'host' || isPrivate) {
+                performances.connectionType = 'local';
+              } else {
+                performances.connectionType = 'remote';
+              }
+            }
 
             performances.bytesReceived =
               candidateBytesReceived > 0

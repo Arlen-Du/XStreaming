@@ -10,9 +10,14 @@ const {BatteryModule} = NativeModules;
 type Props = {
   performance: any;
   streamType?: string;
+  connectionType?: string;
 };
 
-const PerfPanel: React.FC<Props> = ({performance = {}, streamType}) => {
+const PerfPanel: React.FC<Props> = ({
+  performance = {},
+  streamType,
+  connectionType,
+}) => {
   const {t} = useTranslation();
   const settings = getSettings();
   const [battery, setBattery] = React.useState(100);
@@ -24,6 +29,35 @@ const PerfPanel: React.FC<Props> = ({performance = {}, streamType}) => {
   const rttLabel = `${t('RTT')}${
     xcloudRegionFlag ? `(${xcloudRegionFlag})` : ''
   }`;
+
+  // Real stream connection type: 'cloud' | 'local' | 'remote'
+  const isCloud = streamType === 'cloud';
+  const effectiveConnType = performance.connectionType || connectionType;
+
+  let connBadgeText = '';
+  let connBadgeType: 'cloud' | 'local' | 'remote' = 'remote';
+
+  if (isCloud) {
+    connBadgeText = t('Cloud Game');
+    connBadgeType = 'cloud';
+  } else if (effectiveConnType === 'local') {
+    connBadgeText = t('Local Direct');
+    connBadgeType = 'local';
+  } else if (effectiveConnType === 'remote') {
+    connBadgeText = t('Remote Stream');
+    connBadgeType = 'remote';
+  } else {
+    const rttNum = parseFloat(String(performance.rtt || ''));
+    if (!isNaN(rttNum) && rttNum > 0) {
+      if (rttNum <= 15) {
+        connBadgeText = t('Local Direct');
+        connBadgeType = 'local';
+      } else {
+        connBadgeText = t('Remote Stream');
+        connBadgeType = 'remote';
+      }
+    }
+  }
 
   React.useEffect(() => {
     const getBattery = () => {
@@ -113,6 +147,30 @@ const PerfPanel: React.FC<Props> = ({performance = {}, streamType}) => {
         {opacity: settings.performance_opacity || 0.7},
       ]}>
       <View style={isHorizon ? styles.wrapperH : styles.wrapperV}>
+        {connBadgeText ? (
+          <View
+            style={[
+              styles.connBadge,
+              connBadgeType === 'local'
+                ? styles.connBadgeLocal
+                : connBadgeType === 'cloud'
+                ? styles.connBadgeCloud
+                : styles.connBadgeRemote,
+            ]}>
+            <Text
+              style={[
+                styles.connBadgeText,
+                connBadgeType === 'local'
+                  ? styles.connTextLocal
+                  : connBadgeType === 'cloud'
+                  ? styles.connTextCloud
+                  : styles.connTextRemote,
+              ]}>
+              {connBadgeText}
+            </Text>
+          </View>
+        ) : null}
+
         {resolutionText ? (
           <View style={styles.resBadge}>
             <Text style={styles.resText}>{resolutionText}</Text>
@@ -182,6 +240,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     elevation: 6,
+  },
+  connBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+    borderWidth: 1,
+    marginRight: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  connBadgeLocal: {
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: 'rgba(52, 211, 153, 0.45)',
+  },
+  connBadgeRemote: {
+    backgroundColor: 'rgba(14, 165, 233, 0.2)',
+    borderColor: 'rgba(56, 189, 248, 0.45)',
+  },
+  connBadgeCloud: {
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderColor: 'rgba(167, 139, 250, 0.45)',
+  },
+  connBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  connTextLocal: {
+    color: '#6EE7B7',
+  },
+  connTextRemote: {
+    color: '#7DD3FC',
+  },
+  connTextCloud: {
+    color: '#C4B5FD',
   },
   resBadge: {
     backgroundColor: 'rgba(16, 124, 16, 0.22)',

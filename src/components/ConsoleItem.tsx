@@ -112,35 +112,64 @@ const ConsoleItem = (props: any) => {
   };
 
   const renderNetworkBadge = () => {
-    // 只要设备连接局域网 Wi-Fi 或有线，且主机可用（开机或待机），即为本地网络状态
-    const isLocalDirect =
-      (netType === 'wifi' || netType === 'ethernet') && (isPowerOn || isStandby);
-    const iconName = isLocalDirect ? 'wifi' : 'earth';
-    const text = isLocalDirect ? t('Local direct') : t('Remote stream');
+    // 列表卡片准确展示掌机/手机当前设备网络，不预判局域网直连还是远程穿透
+    let iconName = 'wifi';
+    let text = 'Wi-Fi';
+    let isPositive = true;
+    let isWarning = false;
 
-    const color = isLocalDirect
+    if (netType === 'wifi') {
+      iconName = 'wifi';
+      text = 'Wi-Fi';
+      isPositive = true;
+    } else if (netType === 'ethernet') {
+      iconName = 'ethernet';
+      text = t('Ethernet');
+      isPositive = true;
+    } else if (netType === 'cellular') {
+      iconName = 'antenna';
+      text = t('Cellular');
+      isPositive = false;
+      isWarning = true;
+    } else {
+      iconName = 'wifi-off';
+      text = t('No network');
+      isPositive = false;
+    }
+
+    const color = isPositive
       ? theme.dark
         ? '#34D399'
         : '#059669'
-      : theme.dark
-      ? '#60A5FA'
-      : '#2563EB';
+      : isWarning
+      ? theme.dark
+        ? '#FBBF24'
+        : '#D97706'
+      : '#9CA3AF';
 
-    const bgColor = isLocalDirect
+    const bgColor = isPositive
       ? theme.dark
         ? 'rgba(16, 185, 129, 0.14)'
         : 'rgba(16, 185, 129, 0.1)'
+      : isWarning
+      ? theme.dark
+        ? 'rgba(245, 158, 11, 0.14)'
+        : 'rgba(245, 158, 11, 0.1)'
       : theme.dark
-      ? 'rgba(59, 130, 246, 0.14)'
-      : 'rgba(37, 99, 235, 0.1)';
+      ? 'rgba(156, 163, 175, 0.14)'
+      : 'rgba(156, 163, 175, 0.1)';
 
-    const borderColor = isLocalDirect
+    const borderColor = isPositive
       ? theme.dark
         ? 'rgba(52, 211, 153, 0.32)'
         : 'rgba(16, 185, 129, 0.3)'
+      : isWarning
+      ? theme.dark
+        ? 'rgba(251, 191, 36, 0.32)'
+        : 'rgba(245, 158, 11, 0.28)'
       : theme.dark
-      ? 'rgba(96, 165, 250, 0.32)'
-      : 'rgba(37, 99, 235, 0.28)';
+      ? 'rgba(156, 163, 175, 0.28)'
+      : 'rgba(156, 163, 175, 0.25)';
 
     return (
       <View

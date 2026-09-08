@@ -124,6 +124,7 @@ function StreamScreen({navigation, route}: any) {
   const [showVirtualGamepad, setShowVirtualGamepad] = React.useState(false);
   const [connectState, setConnectState] = React.useState('');
   const [performance, setPerformance] = React.useState<any>({});
+  const [connectionType, setConnectionType] = React.useState<string>('');
   const [showPerformance, setShowPerformance] = React.useState(false);
   const [needPoweroff, setNeedPoweroff] = React.useState(false);
   const [modalMaxHeight, setModalMaxHeight] = React.useState(250);
@@ -1162,6 +1163,9 @@ function StreamScreen({navigation, route}: any) {
         });
       }
     }
+    if (type === 'connectionType') {
+      setConnectionType(message);
+    }
     if (type === 'connectionstate') {
       // Toggle microphone
       if (
@@ -1617,7 +1621,11 @@ function StreamScreen({navigation, route}: any) {
   return (
     <>
       {!isInPictureInPicture && showPerformance && isNativeLikeKernel && (
-        <PerfPanel performance={performance} />
+        <PerfPanel
+          performance={performance}
+          streamType={route.params?.streamType}
+          connectionType={connectionType}
+        />
       )}
 
       {renderVirtualGamepad()}
@@ -1912,6 +1920,59 @@ function StreamScreen({navigation, route}: any) {
           allowsFullscreenVideo={true}
           allowsInlineMediaPlayback={true}
           androidLayerType={'hardware'}
+          injectedJavaScriptBeforeContentLoaded={`
+            (function() {
+              try {
+                var OrigPC = window.RTCPeerConnection;
+                if (!OrigPC) return;
+                window.__candidatePoller = null;
+                window.RTCPeerConnection = function() {
+                  var pc = typeof Reflect !== 'undefined' && Reflect.construct
+                    ? Reflect.construct(OrigPC, arguments)
+                    : new OrigPC(arguments[0], arguments[1]);
+
+                  var checkStats = function() {
+                    if (!pc || pc.connectionState === 'closed') {
+                      if (window.__candidatePoller) clearInterval(window.__candidatePoller);
+                      return;
+                    }
+                    if (typeof pc.getStats === 'function') {
+                      pc.getStats().then(function(stats) {
+                        var remoteMap = {};
+                        var activePair = null;
+                        stats.forEach(function(report) {
+                          if (report.type === 'remote-candidate') {
+                            remoteMap[report.id] = report;
+                          } else if (report.type === 'candidate-pair' && (report.state === 'succeeded' || report.nominated || report.selected)) {
+                            activePair = report;
+                          }
+                        });
+                        if (activePair && activePair.remoteCandidateId && remoteMap[activePair.remoteCandidateId]) {
+                          var cand = remoteMap[activePair.remoteCandidateId];
+                          var ip = cand.address || cand.ip || '';
+                          var isPrivate = /^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.|fc00:|fe80:)/i.test(ip);
+                          var connType = (cand.candidateType === 'host' || isPrivate) ? 'local' : 'remote';
+                          if (window.__lastReportedConn !== connType) {
+                            window.__lastReportedConn = connType;
+                            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                              window.ReactNativeWebView.postMessage(JSON.stringify({
+                                type: 'connectionType',
+                                message: connType
+                              }));
+                            }
+                          }
+                        }
+                      }).catch(function() {});
+                    }
+                  };
+                  window.__candidatePoller = setInterval(checkStats, 2000);
+                  return pc;
+                };
+                window.RTCPeerConnection.prototype = OrigPC.prototype;
+              } catch (e) {}
+            })();
+            true;
+          `}
           injectedJavaScriptObject={{
             settings,
             streamType: route.params?.streamType,
