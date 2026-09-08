@@ -108,7 +108,10 @@ const PerfPanel: React.FC<Props> = ({performance = {}, streamType}) => {
   return (
     <View
       pointerEvents="none"
-      style={isHorizon ? styles.containerH : styles.containerV}>
+      style={[
+        isHorizon ? styles.containerH : styles.containerV,
+        {opacity: settings.performance_opacity || 0.7},
+      ]}>
       <View style={isHorizon ? styles.wrapperH : styles.wrapperV}>
         {resolutionText ? (
           <View style={styles.resBadge}>

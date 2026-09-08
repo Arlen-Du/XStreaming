@@ -148,11 +148,9 @@ export default {
     PoweredOnSentText: '已发送开机指令',
     PoweredOffSentText: '已发送关机指令',
     Theme: '主题',
-    'Set the app theme to take effect on the next launch':
-      '设置APP主题，下次启动生效',
+    'Set the app theme to take effect on the next launch': '切换APP主题',
     'Theme primary color': '主题色',
-    'Choose app primary color, takes effect on next launch':
-      '选择应用主题色，下次启动生效',
+    'Choose app primary color, takes effect on next launch': '自定义应用主题色',
     'Choose from preset palette for best readability':
       '建议从预设调色盘中选择，以获得更好的可读性',
     'Signal server': '信令服务器',
@@ -191,6 +189,8 @@ export default {
     'Always display the performance panel': '始终显示性能面板',
     'Performance show style': '性能展示样式',
     'Setting performance show style': '设置性能展示(水平/垂直)',
+    Performance_opacity_title: '性能面板透明度',
+    Performance_opacity_desc: '调节性能面板透明度',
     'It has been detected that you are using the wired connection mode with the Overwrite Android driver. If the USB connection is disconnected during the game, please exit the game and reconnect the controller; otherwise, the controller buttons will become unresponsive':
       '检测到你正在使用覆盖安卓驱动有线连接模式，请保证进入游戏前连接USB。如果在游戏过程断开USB连接，可能会导致手柄按键失效',
     'If you are using an Xbox One/S/X controller and encounter unresponsive buttons when entering the game, please press the home button on the controller first':
@@ -521,7 +521,8 @@ export default {
     'Tampilkan semua': '显示全部',
     'Find games': '搜索游戏',
     'Session report': '会话报告',
-    'Show session report after exiting game stream': '退出游戏串流后显示会话报告',
+    'Show session report after exiting game stream':
+      '退出游戏串流后显示会话报告',
     'Stream speed': '串流速率',
     'Timing variation': '时间变化',
     'Average / target FPS': '平均 / 目标帧率',

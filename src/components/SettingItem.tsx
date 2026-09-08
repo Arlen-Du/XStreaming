@@ -14,7 +14,7 @@ type Props = {
   badgeText?: string;
 };
 
-const SettingItem: React.FC<Props> = ({
+const SettingItem: React.FC<Props> = React.memo(({
   title,
   description,
   onPress,
@@ -109,7 +109,7 @@ const SettingItem: React.FC<Props> = ({
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

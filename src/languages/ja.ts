@@ -128,10 +128,10 @@ export default {
     PoweredOffSentText: '電源オフコマンド送信済み',
     Theme: 'テーマ',
     'Set the app theme to take effect on the next launch':
-      '次回起動時に反映されます।',
+      'アプリのテーマを切り替え',
     'Theme primary color': 'メインカラー',
     'Choose app primary color, takes effect on next launch':
-      'アプリの色を選択।',
+      'アプリのテーマ色をカスタマイズ',
     'Choose from preset palette for best readability':
       '視認性の良い色を選択してください।',
     'Signal server': 'シグナルサーバー',
@@ -165,6 +165,8 @@ export default {
     'Always display the performance panel': '常にパネルを表示',
     'Performance show style': '表示スタイル',
     'Setting performance show style': '表示スタイル設定 (横/縦)',
+    Performance_opacity_title: 'パフォーマンスパネルの透明度',
+    Performance_opacity_desc: 'パフォーマンスパネルの透明度を調整',
     'It has been detected that you are using the wired connection mode with the Overwrite Android driver. If the USB connection is disconnected during the game, please exit the game and reconnect the controller; otherwise, the controller buttons will become unresponsive':
       'USB切断時はゲームを終了して再接続してください।',
     'If you are using an Xbox One/S/X controller and encounter unresponsive buttons when entering the game, please press the home button on the controller first':

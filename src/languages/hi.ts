@@ -130,9 +130,9 @@ export default {
     PoweredOffSentText: 'पावर ऑफ कमांड भेजी गई',
     Theme: 'थीम',
     'Set the app theme to take effect on the next launch':
-      'अगली बार ऐप खोलने पर थीम बदल जाएगी।',
+      'ऐप थीम बदलें',
     'Theme primary color': 'थीम का मुख्य रंग',
-    'Choose app primary color, takes effect on next launch': 'ऐप का रंग चुनें।',
+    'Choose app primary color, takes effect on next launch': 'ऐप थीम का रंग कस्टमाइज़ करें',
     'Choose from preset palette for best readability':
       'बेहतर दिखावट के लिए रंगों का चयन करें।',
     'Signal server': 'सिग्नल सर्वर',
@@ -170,6 +170,8 @@ export default {
     'Performance show style': 'प्रदर्शन की शैली',
     'Setting performance show style':
       'प्रदर्शन की शैली सेट करें (क्षैतिज/लंबवत)',
+    Performance_opacity_title: 'प्रदर्शन पैनल की पारदर्शिता',
+    Performance_opacity_desc: 'प्रदर्शन पैनल की पारदर्शिता समायोजित करें',
     'It has been detected that you are using the wired connection mode with the Overwrite Android driver. If the USB connection is disconnected during the game, please exit the game and reconnect the controller; otherwise, the controller buttons will become unresponsive':
       'USB डिस्कनेक्ट होने पर गेम से बाहर निकलें और फिर से कनेक्ट करें।',
     'If you are using an Xbox One/S/X controller and encounter unresponsive buttons when entering the game, please press the home button on the controller first':

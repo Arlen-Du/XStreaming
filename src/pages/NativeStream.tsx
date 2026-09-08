@@ -1888,7 +1888,9 @@ export function NativeStreamScreenBase({
         route.params?.titleItem?.ProductTitle ||
         route.params?.titleItem?.titleName ||
         route.params?.titleItem?.Title ||
-        (route.params?.streamType === 'cloud' ? 'Xbox Cloud Gaming' : 'Xbox Console');
+        (route.params?.streamType === 'cloud'
+          ? 'Xbox Cloud Gaming'
+          : 'Xbox Console');
 
       const titleItem = route.params?.titleItem;
       let rawPoster =
@@ -1931,6 +1933,8 @@ export function NativeStreamScreenBase({
     route.params?.gameTitle,
     route.params?.titleItem,
     route.params?.streamType,
+    route.params?.sessionId,
+    settings,
     settings?.codec,
     settings?.resolution,
   ]);
@@ -2227,59 +2231,65 @@ export function NativeStreamScreenBase({
 
   // Virtual gamepad press start
   const handleButtonPressIn = name => {
-    if (name === VIRTUAL_MACRO_BUTTON_NAME) {
+    const names = Array.isArray(name) ? name : [name];
+    if (names.length === 1 && names[0] === VIRTUAL_MACRO_BUTTON_NAME) {
       handleMacroPressIn();
       return;
     }
 
     const hold_buttons = settings.hold_buttons || [];
-    if (name === 'LeftThumb') {
-      setManualLeftThumbPressed(
-        hold_buttons.includes(name) ? !manualLeftThumbPressedRef.current : true,
-      );
-      if (settings.vibration) {
-        Vibration.vibrate(30);
+    let shouldVibrate = false;
+    names.forEach(item => {
+      if (item === 'LeftThumb') {
+        setManualLeftThumbPressed(
+          hold_buttons.includes(item)
+            ? !manualLeftThumbPressedRef.current
+            : true,
+        );
+        shouldVibrate = true;
+        return;
       }
-      return;
-    }
 
-    // Hold button
-    if (hold_buttons.includes(name)) {
-      gpState[name] = gpState[name] === 1 ? 0 : 1;
-      return;
-    }
-    gpState[name] = 1;
+      if (hold_buttons.includes(item)) {
+        gpState[item] = gpState[item] === 1 ? 0 : 1;
+        return;
+      }
+      gpState[item] = 1;
+      shouldVibrate = true;
+    });
 
-    if (settings.vibration) {
+    if (shouldVibrate && settings.vibration) {
       Vibration.vibrate(30);
     }
   };
 
   // Virtual gamepad press end
   const handleButtonPressOut = name => {
-    if (name === VIRTUAL_MACRO_BUTTON_NAME) {
+    const names = Array.isArray(name) ? name : [name];
+    if (names.length === 1 && names[0] === VIRTUAL_MACRO_BUTTON_NAME) {
       handleMacroPressOut();
       return;
     }
 
     const hold_buttons = settings.hold_buttons || [];
-    if (name === 'LeftThumb') {
-      if (hold_buttons.includes(name)) {
+    names.forEach(item => {
+      if (item === 'LeftThumb') {
+        if (hold_buttons.includes(item)) {
+          return;
+        }
+        setTimeout(() => {
+          setManualLeftThumbPressed(false);
+        }, 50);
+        return;
+      }
+
+      if (hold_buttons.includes(item)) {
         return;
       }
       setTimeout(() => {
-        setManualLeftThumbPressed(false);
+        gpState[item] = 0;
       }, 50);
-      return;
-    }
-
-    // Hold button
-    if (hold_buttons.includes(name)) {
-      return;
-    }
-    setTimeout(() => {
-      gpState[name] = 0;
-    }, 50);
+    });
   };
 
   // Virtual gamepad stick move

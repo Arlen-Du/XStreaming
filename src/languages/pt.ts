@@ -133,10 +133,10 @@ export default {
     PoweredOffSentText: 'Comando para desligar enviado',
     Theme: 'Tema',
     'Set the app theme to take effect on the next launch':
-      'O tema será aplicado na próxima vez que o app for iniciado.',
+      'Alternar tema do app',
     'Theme primary color': 'Cor principal do tema',
     'Choose app primary color, takes effect on next launch':
-      'Escolha a cor principal do app. A alteração será aplicada na próxima inicialização.',
+      'Personalizar a cor do tema do app',
     'Choose from preset palette for best readability':
       'Escolha uma cor da paleta para obter melhor legibilidade.',
     'Signal server': 'Servidor de conexão',
@@ -180,6 +180,8 @@ export default {
     'Performance show style': 'Estilo das informações de desempenho',
     'Setting performance show style':
       'Escolher como as informações de desempenho serão exibidas (horizontal/vertical)',
+    Performance_opacity_title: 'Opacidade do painel de desempenho',
+    Performance_opacity_desc: 'Ajustar a opacidade do painel de desempenho',
     'It has been detected that you are using the wired connection mode with the Overwrite Android driver. If the USB connection is disconnected during the game, please exit the game and reconnect the controller; otherwise, the controller buttons will become unresponsive':
       'Foi detectado que você está usando um controle conectado por cabo com o driver Android substituído. Se o USB for desconectado durante o jogo, saia do jogo e reconecte o controle. Caso contrário, os botões poderão parar de responder.',
     'If you are using an Xbox One/S/X controller and encounter unresponsive buttons when entering the game, please press the home button on the controller first':

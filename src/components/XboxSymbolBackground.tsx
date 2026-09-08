@@ -13,9 +13,11 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
+import {normalizeHexColor, shiftColor} from '../utils/themeColor';
 
 type Props = {
   isLight: boolean;
+  primaryColor?: string;
 };
 
 const BACKGROUND_OVERDRAW = 96;
@@ -114,37 +116,46 @@ const SYMBOLS: SymbolItem[] = [
   {kind: 'nexus', x: 0.1, y: 0.99, size: 46, rotate: -6, opacity: 0.18},
 ];
 
-const usePalette = (isLight: boolean) => {
+const usePalette = (isLight: boolean, primaryColor?: string) => {
+  const primary = normalizeHexColor(primaryColor, '#107C10');
+
   if (isLight) {
+    const symbol = primary;
+    const symbolAlt = shiftColor(primary, -0.22);
+    const symbolText = shiftColor(primary, -0.42);
     return {
       start: '#F8FAFC',
       mid: '#F1F5F9',
       end: '#FFFFFF',
       washA: '#D8CCFF',
       washB: '#F6D9EA',
-      washC: '#DDF9F0',
-      symbol: '#107C10',
-      symbolAlt: '#2E7D32',
-      symbolText: '#0B4D10',
+      washC: shiftColor(primary, 0.72),
+      symbol,
+      symbolAlt,
+      symbolText,
       base: '#F8FAFC',
       hazeOpacity: 0.22,
       symbolBoost: 0.85,
     };
   }
 
+  const symbol = shiftColor(primary, 0.4);
+  const symbolAlt = primary;
+  const symbolText = shiftColor(primary, 0.65);
   return {
     start: '#0E121E',
     mid: '#141A29',
     end: '#0A0D15',
     washA: '#5846B5',
     washB: '#823762',
-    washC: '#206B62',
-    symbol: '#6EEB83',
-    symbolAlt: '#20A64A',
-    symbolText: '#B8FFC4',
+    washC: shiftColor(primary, -0.25),
+    symbol,
+    symbolAlt,
+    symbolText,
     base: '#0E121E',
     hazeOpacity: 0.09,
     symbolBoost: 1.1,
+  };
   };
 };
 
@@ -321,14 +332,10 @@ const renderSymbol = (
   return renderStripe(item, index, width, height, palette);
 };
 
-const XboxSymbolBackground = ({isLight}: Props) => {
-  const windowDimensions = useWindowDimensions();
-  const screenDimensions = Dimensions.get('screen');
-  const width = Math.max(windowDimensions.width, screenDimensions.width);
-  const height =
-    Math.max(windowDimensions.height, screenDimensions.height) +
-    BACKGROUND_OVERDRAW;
-  const palette = usePalette(isLight);
+const XboxSymbolBackground = ({isLight, primaryColor}: Props) => {
+  const {width, height: windowHeight} = useWindowDimensions();
+  const height = windowHeight + BACKGROUND_OVERDRAW;
+  const palette = usePalette(isLight, primaryColor);
 
   return (
     <Svg

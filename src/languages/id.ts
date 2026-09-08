@@ -147,10 +147,10 @@ export default {
     PoweredOffSentText: 'Perintah mematikan konsol telah dikirim',
     Theme: 'Tema',
     'Set the app theme to take effect on the next launch':
-      'Pilih tema aplikasi (berlaku saat aplikasi dibuka kembali)',
+      'Ganti tema aplikasi',
     'Theme primary color': 'Warna utama tema',
     'Choose app primary color, takes effect on next launch':
-      'Pilih warna aksen utama aplikasi (berlaku saat aplikasi dibuka kembali)',
+      'Sesuaikan warna tema aplikasi',
     'Choose from preset palette for best readability':
       'Pilih dari palet warna siap pakai untuk keterbacaan terbaik',
     'Signal server': 'Server sinyal',
@@ -193,6 +193,8 @@ export default {
     'Performance show style': 'Gaya tampilan performa',
     'Setting performance show style':
       'Atur tata letak overlay performa (horizontal atau vertikal)',
+    Performance_opacity_title: 'Opasitas panel performa',
+    Performance_opacity_desc: 'Sesuaikan opasitas panel performa',
     'It has been detected that you are using the wired connection mode with the Overwrite Android driver. If the USB connection is disconnected during the game, please exit the game and reconnect the controller; otherwise, the controller buttons will become unresponsive':
       'Terdeteksi mode koneksi kabel dengan driver kustom aktif. Pastikan kabel USB tetap terhubung sebelum memulai game. Jika kabel USB terlepas saat bermain, keluar dari sesi game dan sambungkan kembali kontroler; jika tidak, input tombol bisa berhenti merespons.',
     'If you are using an Xbox One/S/X controller and encounter unresponsive buttons when entering the game, please press the home button on the controller first':

@@ -178,7 +178,9 @@ function SettingsScreen({navigation}) {
     <View style={styles.container}>
       <Spinner loading={loading} text={t('Loading...')} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        removeClippedSubviews={true}>
         {/* User Status Card */}
         {isAuthed && user ? (
           <View
