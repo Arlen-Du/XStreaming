@@ -6,12 +6,12 @@ import {
   FlatList,
   Platform,
   ScrollView,
-  Dimensions,
   SafeAreaView,
   NativeModules,
   ToastAndroid,
   Linking,
   TouchableOpacity,
+  useWindowDimensions,
 } from 'react-native';
 import {
   Button,
@@ -66,7 +66,6 @@ function HomeScreen({navigation, route}) {
   const [currentConsoleId, setCurrentConsoleId] = React.useState('');
   const [showUsbWarnModal, setShowUsbWarnShowModal] = React.useState(false);
   const [showHarmonyModal, setShowHarmonyModal] = React.useState(false);
-  const [numColumns, setNumColumns] = React.useState(2);
   const [showLogin, setShowLogin] = React.useState(false);
   const [showMsalLogin, setShowMsalLogin] = React.useState(false);
   const [showMsal, setShowMsal] = React.useState(false);
@@ -95,10 +94,23 @@ function HomeScreen({navigation, route}) {
     _isFocused.current = isFocused;
   }, [isFocused]);
 
-  const {width} = Dimensions.get('window');
+  const {width, height} = useWindowDimensions();
+  const isLandscape = width > height;
+  const numColumns = isLandscape
+    ? consoles.length <= 1
+      ? 1
+      : consoles.length === 2
+      ? 2
+      : 4
+    : 2;
+
   const emptyConsoleCardStyle = React.useMemo(
-    () => [styles.emptyConsoleCard, theme.dark && styles.emptyConsoleCardDark],
-    [theme.dark],
+    () => [
+      styles.emptyConsoleCard,
+      isLandscape && styles.emptyConsoleCardLandscape,
+      theme.dark && styles.emptyConsoleCardDark,
+    ],
+    [theme.dark, isLandscape],
   );
 
   React.useEffect(() => {
@@ -126,14 +138,6 @@ function HomeScreen({navigation, route}) {
     ) {
       setShowHarmonyModal(true);
     }
-
-    const updateLayout = () => {
-      const {width: w, height: h} = Dimensions.get('window');
-      setNumColumns(w > h ? 4 : 2);
-    };
-
-    updateLayout();
-    const subscription = Dimensions.addEventListener('change', updateLayout);
 
     const unsubscribe = NetInfo.addEventListener((state: any) => {
       setIsConnected(state.isConnected);
@@ -383,7 +387,6 @@ function HomeScreen({navigation, route}) {
     }
 
     return () => {
-      subscription?.remove();
       unsubscribe();
     };
   }, [
@@ -712,36 +715,57 @@ function HomeScreen({navigation, route}) {
       );
     } else {
       return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+          style={[styles.container, isLandscape && styles.containerLandscape]}>
           <ScrollView
             style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}>
-            {/* Top Dashboard Header */}
-            <View style={styles.dashboardHeader}>
+            contentContainerStyle={[
+              styles.scrollContent,
+              isLandscape && styles.scrollContentLandscape,
+            ]}
+            bounces={!isLandscape}>
+            <View
+              style={[
+                styles.contentStage,
+                isLandscape && {
+                  width: '100%',
+                  maxWidth: (height * 16) / 9,
+                  alignSelf: 'center',
+                },
+              ]}>
+              {/* Top Dashboard Header */}
+              <View
+                style={[
+                  styles.dashboardHeader,
+                  isLandscape && styles.dashboardHeaderLandscape,
+                ]}>
               <View style={styles.brandContainer}>
                 <View style={styles.brandTitleRow}>
                   <Text
-                    variant="headlineSmall"
+                    variant={isLandscape ? 'titleMedium' : 'headlineSmall'}
                     style={[
                       styles.brandTitle,
+                      isLandscape && styles.brandTitleLandscape,
                       theme.dark
                         ? styles.brandTitleDark
                         : styles.brandTitleLight,
                     ]}>
                     XStreaming
                   </Text>
-                  <View style={styles.brandDot} />
+                  <View style={[styles.brandDot, isLandscape && styles.brandDotLandscape]} />
                 </View>
-                <Text
-                  variant="labelSmall"
-                  style={[
-                    styles.brandSubtitle,
-                    theme.dark
-                      ? styles.brandSubtitleDark
-                      : styles.brandSubtitleLight,
-                  ]}>
-                  Xbox Remote Play & Cloud
-                </Text>
+                {!isLandscape && (
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.brandSubtitle,
+                      theme.dark
+                        ? styles.brandSubtitleDark
+                        : styles.brandSubtitleLight,
+                    ]}>
+                    Xbox Remote Play & Cloud
+                  </Text>
+                )}
               </View>
 
               <TouchableOpacity
@@ -749,13 +773,14 @@ function HomeScreen({navigation, route}) {
                 onPress={handleRefreshConsoles}
                 style={[
                   styles.headerRefreshBtn,
+                  isLandscape && styles.headerRefreshBtnLandscape,
                   theme.dark
                     ? styles.headerRefreshBtnDark
                     : styles.headerRefreshBtnLight,
                 ]}>
                 <IconButton
                   icon="refresh"
-                  size={20}
+                  size={isLandscape ? 16 : 20}
                   iconColor={theme.dark ? '#86EFAC' : '#107C10'}
                   style={styles.refreshIconInner}
                 />
@@ -763,13 +788,18 @@ function HomeScreen({navigation, route}) {
             </View>
 
             {/* Consoles Section */}
-            <View style={styles.sectionHeader}>
+            <View
+              style={[
+                styles.sectionHeader,
+                isLandscape && styles.sectionHeaderLandscape,
+              ]}>
               <View style={styles.sectionTitleRow}>
-                <View style={styles.accentBar} />
+                <View style={[styles.accentBar, isLandscape && styles.accentBarLandscape]} />
                 <Text
-                  variant="titleLarge"
+                  variant={isLandscape ? 'titleMedium' : 'titleLarge'}
                   style={[
                     styles.sectionTitleText,
+                    isLandscape && styles.sectionTitleTextLandscape,
                     theme.dark ? styles.textDark : styles.textLight,
                   ]}>
                   {t('Consoles')}
@@ -780,6 +810,7 @@ function HomeScreen({navigation, route}) {
                 <View
                   style={[
                     styles.countBadge,
+                    isLandscape && styles.countBadgeLandscape,
                     theme.dark
                       ? styles.countBadgeDark
                       : styles.countBadgeLight,
@@ -798,20 +829,32 @@ function HomeScreen({navigation, route}) {
             </View>
 
             {consoles.length > 0 ? (
-              <View style={styles.consoleList}>
+              <View
+                style={[
+                  styles.consoleList,
+                  isLandscape && styles.consoleListLandscape,
+                ]}>
                 <FlatList
                   data={consoles}
                   numColumns={numColumns}
                   key={numColumns}
-                  contentContainerStyle={styles.listContainer}
+                  contentContainerStyle={[
+                    styles.listContainer,
+                    isLandscape && consoles.length === 1 && styles.listContainerSingle,
+                  ]}
                   scrollEnabled={false}
                   renderItem={({item}: any) => {
                     return (
                       <View
                         style={[
                           styles.consoleItem,
-                          numColumns === 4
-                            ? styles.listItemH
+                          isLandscape && styles.consoleItemLandscape,
+                          isLandscape
+                            ? numColumns === 1
+                              ? styles.listItemSingle
+                              : numColumns === 2
+                              ? styles.listItemHalf
+                              : styles.listItemH
                             : styles.listItemV,
                         ]}>
                         <ConsoleItem
@@ -829,31 +872,52 @@ function HomeScreen({navigation, route}) {
                 />
               </View>
             ) : (
-              <View style={styles.noConsoles}>
+              <View
+                style={[
+                  styles.noConsoles,
+                  isLandscape && styles.noConsolesLandscape,
+                ]}>
                 <View style={emptyConsoleCardStyle}>
-                  <View style={styles.emptyIconCircle}>
+                  <View
+                    style={[
+                      styles.emptyIconCircle,
+                      isLandscape && styles.emptyIconCircleLandscape,
+                    ]}>
                     <IconButton
                       icon="microsoft-xbox"
-                      size={32}
+                      size={isLandscape ? 20 : 32}
                       iconColor={theme.dark ? '#6EEB83' : '#107C10'}
                       style={{margin: 0}}
                     />
                   </View>
                   <Text
-                    variant="titleMedium"
+                    variant={isLandscape ? 'titleSmall' : 'titleMedium'}
                     style={[
                       styles.emptyConsoleTitle,
+                      isLandscape && styles.emptyConsoleTitleLandscape,
                       theme.dark ? styles.textDark : styles.textLight,
                     ]}>
                     {t('Consoles')}
                   </Text>
-                  <Text style={styles.emptyConsoleDesc}>{t('NoConsoles')}</Text>
+                  <Text
+                    style={[
+                      styles.emptyConsoleDesc,
+                      isLandscape && styles.emptyConsoleDescLandscape,
+                    ]}>
+                    {t('NoConsoles')}
+                  </Text>
                   <View style={styles.emptyConsoleActions}>
                     <Button
                       mode="contained"
                       icon="refresh"
-                      style={styles.emptyActionBtn}
-                      labelStyle={styles.emptyActionBtnLabel}
+                      style={[
+                        styles.emptyActionBtn,
+                        isLandscape && styles.emptyActionBtnLandscape,
+                      ]}
+                      labelStyle={[
+                        styles.emptyActionBtnLabel,
+                        isLandscape && styles.emptyActionBtnLabelLandscape,
+                      ]}
                       onPress={handleRefreshConsoles}>
                       {t('Refresh')}
                     </Button>
@@ -862,26 +926,16 @@ function HomeScreen({navigation, route}) {
               </View>
             )}
 
-            {/* More Section */}
-            <View style={[styles.sectionHeader, styles.mt16]}>
-              <View style={styles.sectionTitleRow}>
-                <View style={[styles.accentBar, {backgroundColor: '#38BDF8'}]} />
-                <Text
-                  variant="titleLarge"
-                  style={[
-                    styles.sectionTitleText,
-                    theme.dark ? styles.textDark : styles.textLight,
-                  ]}>
-                  {t('More')}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.moreItems}>
+            {/* More Section Icons */}
+            <View
+              style={[
+                styles.moreItems,
+                isLandscape && styles.moreItemsLandscape,
+              ]}>
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '22%' : (width - 56) / 2},
+                  isLandscape && styles.moreItemLandscape,
                 ]}>
                 <HomeItem
                   title={t('Xcloud')}
@@ -894,7 +948,7 @@ function HomeScreen({navigation, route}) {
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '22%' : (width - 56) / 2},
+                  isLandscape && styles.moreItemLandscape,
                 ]}>
                 <HomeItem
                   title={t('Achivements')}
@@ -907,7 +961,7 @@ function HomeScreen({navigation, route}) {
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '22%' : (width - 56) / 2},
+                  isLandscape && styles.moreItemLandscape,
                 ]}>
                 <HomeItem
                   title={t('GamepadTestTitle')}
@@ -920,7 +974,7 @@ function HomeScreen({navigation, route}) {
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '22%' : (width - 56) / 2},
+                  isLandscape && styles.moreItemLandscape,
                 ]}>
                 <HomeItem
                   title={t('Settings')}
@@ -929,6 +983,7 @@ function HomeScreen({navigation, route}) {
                   onPress={() => navigation.navigate('Settings')}
                 />
               </View>
+            </View>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -1052,11 +1107,26 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   listContainer: {},
+  listContainerSingle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   consoleItem: {
     padding: 8,
   },
   listItemH: {
     width: '25%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listItemSingle: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listItemHalf: {
+    width: '50%',
+    alignItems: 'center',
     justifyContent: 'center',
   },
   listItemV: {
@@ -1182,14 +1252,128 @@ const styles = StyleSheet.create({
     color: '#86EFAC',
   },
   moreItems: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
+    marginTop: 16,
+    paddingHorizontal: 12,
+    paddingBottom: 28,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    justifyContent: 'space-around',
   },
   moreItem: {
-    marginBottom: 12,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentStage: {
+    width: '100%',
+  },
+  containerLandscape: {
+    paddingTop: 4,
+    paddingHorizontal: 0,
+  },
+  scrollContentLandscape: {
+    paddingBottom: 16,
+    alignItems: 'center',
+  },
+  dashboardHeaderLandscape: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 6,
+  },
+  brandTitleLandscape: {
+    fontSize: 16,
+    letterSpacing: 0.3,
+  },
+  brandDotLandscape: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginLeft: 4,
+    marginTop: 2,
+  },
+  headerRefreshBtnLandscape: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  sectionHeaderLandscape: {
+    paddingHorizontal: 16,
+    marginBottom: 4,
+  },
+  accentBarLandscape: {
+    width: 3,
+    height: 14,
+    marginRight: 6,
+  },
+  sectionTitleTextLandscape: {
+    fontSize: 14,
+    letterSpacing: 0.2,
+  },
+  countBadgeLandscape: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
+  },
+  consoleListLandscape: {
+    paddingHorizontal: 8,
+    paddingBottom: 4,
+  },
+  consoleItemLandscape: {
+    paddingVertical: 4,
+    paddingHorizontal: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noConsolesLandscape: {
+    paddingHorizontal: 16,
+    paddingBottom: 6,
+  },
+  emptyConsoleCardLandscape: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  emptyIconCircleLandscape: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginBottom: 0,
+    marginRight: 12,
+  },
+  emptyConsoleTitleLandscape: {
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  emptyConsoleDescLandscape: {
+    fontSize: 11,
+    lineHeight: 14,
+    marginBottom: 0,
+    textAlign: 'left',
+  },
+  emptyActionBtnLandscape: {
+    borderRadius: 10,
+  },
+  emptyActionBtnLabelLandscape: {
+    fontSize: 11,
+    paddingHorizontal: 4,
+  },
+  moreItemsLandscape: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    marginTop: 6,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    flexWrap: 'nowrap',
+  },
+  moreItemLandscape: {
+    flex: 0,
+    width: 86,
+    marginHorizontal: 10,
+    marginBottom: 0,
+    paddingHorizontal: 0,
   },
   mt10: {
     marginTop: 10,

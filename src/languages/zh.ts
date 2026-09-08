@@ -58,6 +58,8 @@ export default {
     'Start game': '开始云游戏',
     'Local connect': '本地连接',
     'Remote connect': '远程连接',
+    'Local direct': '本地',
+    'Remote stream': '远程',
     'Search game': '搜索游戏',
     'Toggle Performance': '显示/隐藏性能信息',
     'Toggle Virtual Gamepad': '显示/隐藏虚拟手柄',

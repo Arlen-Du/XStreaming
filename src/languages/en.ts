@@ -60,6 +60,8 @@ export default {
     'Start game': 'Start cloud game',
     'Local connect': 'Local connection',
     'Remote connect': 'Remote connection',
+    'Local direct': 'Local',
+    'Remote stream': 'Remote',
     'Search game': 'Search games',
     'Toggle Performance': 'Show/hide performance',
     'Toggle Virtual Gamepad': 'Show/hide virtual gamepad',
