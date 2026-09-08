@@ -4,7 +4,6 @@ import {
   View,
   Image,
   Platform,
-  Dimensions,
   TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
@@ -33,27 +32,35 @@ const ConsoleItem = (props: any) => {
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
 
-  const [streamMode, setStreamMode] = React.useState<'auto' | 'local' | 'remote'>(
-    settings.stream_connect_mode || 'auto',
-  );
+  const [streamMode, setStreamMode] = React.useState<
+    'auto' | 'local' | 'remote'
+  >(settings.stream_connect_mode || 'auto');
 
   const handleToggleStreamMode = (targetMode?: 'auto' | 'local' | 'remote') => {
     let next: 'auto' | 'local' | 'remote';
     if (targetMode) {
       next = targetMode;
     } else {
-      if (streamMode === 'auto') next = 'local';
-      else if (streamMode === 'local') next = 'remote';
-      else next = 'auto';
+      if (streamMode === 'auto') {
+        next = 'local';
+      } else if (streamMode === 'local') {
+        next = 'remote';
+      } else {
+        next = 'auto';
+      }
     }
 
     setStreamMode(next);
     saveSettings({stream_connect_mode: next});
 
     let msg = '';
-    if (next === 'local') msg = t('Switched to: Local direct');
-    else if (next === 'remote') msg = t('Switched to: Remote stream');
-    else msg = t('Switched to: Auto detect');
+    if (next === 'local') {
+      msg = t('Switched to: Local direct');
+    } else if (next === 'remote') {
+      msg = t('Switched to: Remote stream');
+    } else {
+      msg = t('Switched to: Auto detect');
+    }
 
     if (Platform.OS === 'android') {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
@@ -115,24 +122,9 @@ const ConsoleItem = (props: any) => {
 
     return (
       <View
-        style={[
-          styles.statusBadge,
-          isLandscape && styles.statusBadgeLandscape,
-          {backgroundColor: bgColor, borderColor},
-        ]}>
-        <View
-          style={[
-            styles.statusDot,
-            isLandscape && styles.statusDotLandscape,
-            {backgroundColor: dotColor},
-          ]}
-        />
-        <Text
-          style={[
-            styles.statusText,
-            isLandscape && styles.statusTextLandscape,
-            {color: textColor},
-          ]}>
+        style={[styles.statusBadge, {backgroundColor: bgColor, borderColor}]}>
+        <View style={[styles.statusDot, {backgroundColor: dotColor}]} />
+        <Text style={[styles.statusText, {color: textColor}]}>
           {statusText}
         </Text>
       </View>
@@ -181,20 +173,9 @@ const ConsoleItem = (props: any) => {
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => handleToggleStreamMode()}
-        style={[
-          styles.netBadge,
-          isLandscape && styles.netBadgeLandscape,
-          {backgroundColor: bgColor, borderColor},
-        ]}>
-        <Icon source={iconName} size={isLandscape ? 10 : 12} color={color} />
-        <Text
-          style={[
-            styles.netBadgeText,
-            isLandscape && styles.netBadgeTextLandscape,
-            {color},
-          ]}>
-          {text}
-        </Text>
+        style={[styles.netBadge, {backgroundColor: bgColor, borderColor}]}>
+        <Icon source={iconName} size={12} color={color} />
+        <Text style={[styles.netBadgeText, {color}]}>{text}</Text>
       </TouchableOpacity>
     );
   };
@@ -205,11 +186,7 @@ const ConsoleItem = (props: any) => {
       return (
         <Image
           source={require('../assets/console/series-x.png')}
-          style={[
-            styles.consoleImage,
-            isWide && styles.consoleImageWide,
-            isLandscape && styles.consoleImageLandscape,
-          ]}
+          style={[styles.consoleImage, isWide && styles.consoleImageWide]}
           resizeMode="contain"
         />
       );
@@ -217,21 +194,17 @@ const ConsoleItem = (props: any) => {
       return (
         <Image
           source={require('../assets/console/series-s.png')}
-          style={[
-            styles.consoleImage,
-            isWide && styles.consoleImageWide,
-            isLandscape && styles.consoleImageLandscape,
-          ]}
+          style={[styles.consoleImage, isWide && styles.consoleImageWide]}
           resizeMode="contain"
         />
       );
     } else {
       return (
-        <View style={[styles.svgWrapper, isLandscape && styles.svgWrapperLandscape]}>
+        <View style={styles.svgWrapper}>
           <SvgXml
             xml={theme.dark ? icons.ConsoleDark : icons.ConsoleIcon}
             width={'100%'}
-            height={isLandscape ? 50 : isWide ? 130 : 110}
+            height={isWide ? 130 : 110}
           />
         </View>
       );
@@ -244,37 +217,27 @@ const ConsoleItem = (props: any) => {
   return (
     <Card
       mode="contained"
-      contentStyle={isLandscape ? styles.cardInnerLandscape : undefined}
       style={[
         styles.card,
         isLandscape && styles.cardLandscape,
         theme.dark ? styles.cardDark : styles.cardLight,
         isPowerOn && (theme.dark ? styles.cardGlowDark : styles.cardGlowLight),
       ]}>
-      <Card.Content
-        style={[
-          styles.cardContent,
-          isLandscape && styles.cardContentLandscape,
-        ]}>
+      <Card.Content style={styles.cardContent}>
         {/* Top Header Row */}
-        <View style={[styles.headerRow, isLandscape && styles.headerRowLandscape]}>
+        <View style={styles.headerRow}>
           <View style={styles.titleContainer}>
             <Text
               variant="titleMedium"
               numberOfLines={1}
               style={[
                 styles.deviceName,
-                isLandscape && styles.deviceNameLandscape,
                 theme.dark ? styles.deviceNameDark : styles.deviceNameLight,
               ]}>
               {consoleItem.deviceName || t('Host')}
             </Text>
-            <View style={[styles.badgeWrapper, isLandscape && styles.badgeWrapperLandscape]}>
-              {renderStatusBadge()}
-            </View>
-            <View style={[styles.netBadgeWrapper, isLandscape && styles.netBadgeWrapperLandscape]}>
-              {renderNetworkBadge()}
-            </View>
+            <View style={styles.badgeWrapper}>{renderStatusBadge()}</View>
+            <View style={styles.netBadgeWrapper}>{renderNetworkBadge()}</View>
           </View>
 
           <View style={styles.menuAnchorWrapper}>
@@ -287,12 +250,11 @@ const ConsoleItem = (props: any) => {
                   onPress={openMenu}
                   style={[
                     styles.menuButton,
-                    isLandscape && styles.menuButtonLandscape,
                     theme.dark ? styles.menuButtonDark : styles.menuButtonLight,
                   ]}>
                   <IconButton
                     icon="dots-vertical"
-                    size={isLandscape ? 16 : 20}
+                    size={20}
                     iconColor={theme.dark ? '#E2E8F0' : '#475569'}
                     style={styles.menuIconInner}
                   />
@@ -349,75 +311,80 @@ const ConsoleItem = (props: any) => {
         </View>
 
         {/* Console Stage with ambient glow backdrop */}
-        <View style={[styles.stageContainer, isLandscape && styles.stageContainerLandscape]}>
+        <View style={styles.stageContainer}>
           <View
             style={[
               styles.stageGlow,
-              isLandscape && styles.stageGlowLandscape,
               theme.dark ? styles.stageGlowDark : styles.stageGlowLight,
               isPowerOn && styles.stageGlowActive,
             ]}
           />
-          <View
-            style={[
-              styles.imageContainer,
-              isLandscape && styles.imageContainerLandscape,
-            ]}>
-            {renderImage()}
-          </View>
+          <View style={styles.imageContainer}>{renderImage()}</View>
           <View
             style={[
               styles.stageShadow,
-              isLandscape && styles.stageShadowLandscape,
               theme.dark ? styles.stageShadowDark : styles.stageShadowLight,
             ]}
           />
         </View>
 
-        {/* Metadata chip tags (vertical only to prevent crowding in landscape 1:1 card) */}
-        {!isLandscape && (
-          <View style={styles.metaRow}>
+        {/* Metadata chip tags */}
+        <View style={styles.metaRow}>
+          <View
+            style={[
+              styles.techTag,
+              theme.dark ? styles.techTagDark : styles.techTagLight,
+            ]}>
+            <Icon
+              source="microsoft-xbox"
+              size={13}
+              color={theme.dark ? '#6EEB83' : '#107C10'}
+            />
+            <Text
+              style={[
+                styles.techTagText,
+                theme.dark ? styles.techTagTextDark : styles.techTagLight,
+              ]}>
+              {consoleItem.consoleType || 'Xbox'}
+            </Text>
+          </View>
+
+          {consoleItem.serverId ? (
             <View
               style={[
-                styles.techTag,
-                theme.dark ? styles.techTagDark : styles.techTagLight,
+                styles.serverTag,
+                theme.dark ? styles.serverTagDark : styles.serverTagLight,
               ]}>
-              <Icon
-                source="microsoft-xbox"
-                size={13}
-                color={theme.dark ? '#6EEB83' : '#107C10'}
-              />
               <Text
+                numberOfLines={1}
                 style={[
-                  styles.techTagText,
-                  theme.dark ? styles.techTagTextDark : styles.techTagLight,
+                  styles.serverTagText,
+                  theme.dark
+                    ? styles.serverTagTextDark
+                    : styles.serverTagTextLight,
                 ]}>
-                {consoleItem.consoleType || 'Xbox'}
+                ID:{' '}
+                {consoleItem.serverId.length > 10
+                  ? `...${consoleItem.serverId.slice(-8)}`
+                  : consoleItem.serverId}
               </Text>
             </View>
-          </View>
-        )}
+          ) : null}
+        </View>
 
         {/* Action Button */}
-        <View style={[styles.footer, isLandscape && styles.footerLandscape]}>
+        <View style={styles.footer}>
           {shouldWakeAndStream ? (
             <Button
               mode="contained"
               icon="power"
-              compact={true}
               style={[
                 styles.streamButton,
                 styles.wakeButton,
                 Platform.isTV && styles.tvButton,
               ]}
-              labelStyle={[
-                styles.streamButtonLabel,
-                isLandscape && styles.streamButtonLabelLandscape,
-              ]}
-              contentStyle={[
-                styles.streamButtonContent,
-                isLandscape && styles.streamButtonContentLandscape,
-              ]}
+              labelStyle={styles.streamButtonLabel}
+              contentStyle={styles.streamButtonContent}
               onPress={props.onPoweronStream}>
               {t('Power on and start stream')}
             </Button>
@@ -425,20 +392,13 @@ const ConsoleItem = (props: any) => {
             <Button
               mode="contained"
               icon={isPowerOn ? 'play' : 'remote'}
-              compact={true}
               style={[
                 styles.streamButton,
                 isPowerOn ? styles.activeStreamButton : styles.idleStreamButton,
                 Platform.isTV && styles.tvButton,
               ]}
-              labelStyle={[
-                styles.streamButtonLabel,
-                isLandscape && styles.streamButtonLabelLandscape,
-              ]}
-              contentStyle={[
-                styles.streamButtonContent,
-                isLandscape && styles.streamButtonContentLandscape,
-              ]}
+              labelStyle={styles.streamButtonLabel}
+              contentStyle={styles.streamButtonContent}
               onPress={props.onPress}>
               {t('Start stream')}
             </Button>
@@ -473,15 +433,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.36,
   },
   cardLandscape: {
-    width: 196,
-    height: 196,
-    aspectRatio: 1,
-    borderRadius: 18,
-    elevation: 2,
+    width: 200,
+    maxWidth: '100%',
     alignSelf: 'center',
-  },
-  cardInnerLandscape: {
-    flex: 1,
   },
   cardGlowLight: {
     borderColor: 'rgba(16, 124, 16, 0.28)',
@@ -494,19 +448,11 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 16,
   },
-  cardContentLandscape: {
-    padding: 10,
-    flex: 1,
-    justifyContent: 'space-between',
-  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 8,
-  },
-  headerRowLandscape: {
-    marginBottom: 2,
   },
   titleContainer: {
     flex: 1,
@@ -516,10 +462,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 17,
     letterSpacing: 0.2,
-  },
-  deviceNameLandscape: {
-    fontSize: 12,
-    lineHeight: 16,
   },
   deviceNameLight: {
     color: '#0F172A',
@@ -531,9 +473,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: 'row',
   },
-  badgeWrapperLandscape: {
-    marginTop: 1,
-  },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -542,38 +481,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
   },
-  statusBadgeLandscape: {
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    borderRadius: 8,
-  },
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     marginRight: 6,
   },
-  statusDotLandscape: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginRight: 4,
-  },
   statusText: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
-  statusTextLandscape: {
-    fontSize: 9.5,
-    lineHeight: 12,
-  },
   netBadgeWrapper: {
     marginTop: 4,
     flexDirection: 'row',
-  },
-  netBadgeWrapperLandscape: {
-    marginTop: 2,
   },
   netBadge: {
     flexDirection: 'row',
@@ -583,21 +504,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
   },
-  netBadgeLandscape: {
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 7,
-  },
   netBadgeText: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.2,
     marginLeft: 4,
-  },
-  netBadgeTextLandscape: {
-    fontSize: 9,
-    lineHeight: 12,
-    marginLeft: 3,
   },
   menuAnchorWrapper: {
     marginLeft: 4,
@@ -609,11 +520,6 @@ const styles = StyleSheet.create({
     height: 34,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  menuButtonLandscape: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
   },
   menuButtonLight: {
     backgroundColor: 'rgba(241, 245, 249, 0.8)',
@@ -635,20 +541,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     position: 'relative',
   },
-  stageContainerLandscape: {
-    paddingVertical: 1,
-  },
   stageGlow: {
     position: 'absolute',
     width: 140,
     height: 100,
     borderRadius: 70,
     opacity: 0,
-  },
-  stageGlowLandscape: {
-    width: 80,
-    height: 54,
-    borderRadius: 27,
   },
   stageGlowLight: {
     backgroundColor: 'rgba(16, 124, 16, 0.08)',
@@ -665,10 +563,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 120,
   },
-  imageContainerLandscape: {
-    minHeight: 48,
-    marginVertical: 1,
-  },
   consoleImage: {
     width: 130,
     height: 125,
@@ -677,31 +571,17 @@ const styles = StyleSheet.create({
     width: 150,
     height: 145,
   },
-  consoleImageLandscape: {
-    width: 60,
-    height: 46,
-  },
   svgWrapper: {
     width: 120,
     height: 110,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  svgWrapperLandscape: {
-    width: 58,
-    height: 46,
-  },
   stageShadow: {
     width: 100,
     height: 10,
     borderRadius: 5,
     marginTop: -4,
-  },
-  stageShadowLandscape: {
-    width: 58,
-    height: 6,
-    borderRadius: 3,
-    marginTop: -2,
   },
   stageShadowLight: {
     backgroundColor: 'rgba(0, 0, 0, 0.06)',
@@ -718,12 +598,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 10,
   },
-  metaRowLandscape: {
-    marginTop: 1,
-    marginBottom: 2,
-    gap: 4,
-    flexWrap: 'nowrap',
-  },
   techTag: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -731,11 +605,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 1,
-  },
-  techTagLandscape: {
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 6,
   },
   techTagLight: {
     backgroundColor: 'rgba(16, 124, 16, 0.07)',
@@ -750,10 +619,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginLeft: 4,
   },
-  techTagTextLandscape: {
-    fontSize: 9,
-    marginLeft: 2,
-  },
   techTagTextLight: {
     color: '#107C10',
   },
@@ -765,11 +630,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 1,
-  },
-  serverTagLandscape: {
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 6,
   },
   serverTagLight: {
     backgroundColor: 'rgba(241, 245, 249, 0.9)',
@@ -783,9 +643,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
   },
-  serverTagTextLandscape: {
-    fontSize: 9,
-  },
   serverTagTextLight: {
     color: '#64748B',
   },
@@ -794,9 +651,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 4,
-  },
-  footerLandscape: {
-    marginTop: 2,
   },
   streamButton: {
     borderRadius: 14,
@@ -817,13 +671,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
-  streamButtonContentLandscape: {
-    minHeight: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-  },
   streamButtonLabel: {
     fontSize: 13,
     fontWeight: '800',
@@ -832,14 +679,6 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     marginLeft: 4,
   },
-  streamButtonLabelLandscape: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-    marginVertical: 0,
-    marginLeft: 4,
-    marginRight: 4,
-  },
   tvButton: {
     borderWidth: 2,
     borderColor: '#FFFFFF',
@@ -847,4 +686,3 @@ const styles = StyleSheet.create({
 });
 
 export default ConsoleItem;
-
