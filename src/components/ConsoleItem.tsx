@@ -112,8 +112,9 @@ const ConsoleItem = (props: any) => {
   };
 
   const renderNetworkBadge = () => {
+    // 只要设备连接局域网 Wi-Fi 或有线，且主机可用（开机或待机），即为本地网络状态
     const isLocalDirect =
-      (netType === 'wifi' || netType === 'ethernet') && isPowerOn;
+      (netType === 'wifi' || netType === 'ethernet') && (isPowerOn || isStandby);
     const iconName = isLocalDirect ? 'wifi' : 'earth';
     const text = isLocalDirect ? t('Local direct') : t('Remote stream');
 
