@@ -2518,8 +2518,10 @@ export function NativeStreamScreenBase({
       return (
         <View style={styles.quickMenu}>
           <IconButton
-            icon="menu"
-            size={28}
+            icon="dots-horizontal"
+            size={22}
+            iconColor="#F8FAFC"
+            style={styles.quickMenuIcon}
             onPress={() => {
               setShowModal(true);
             }}
@@ -2800,9 +2802,26 @@ const styles = StyleSheet.create({
   },
   quickMenu: {
     position: 'absolute',
-    right: 5,
-    bottom: 5,
+    right: 14,
+    bottom: 14,
     zIndex: 99,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(15, 23, 42, 0.72)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+  },
+  quickMenuIcon: {
+    margin: 0,
+    padding: 0,
   },
 });
 

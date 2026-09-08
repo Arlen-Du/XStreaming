@@ -11,8 +11,17 @@ import {
   NativeModules,
   ToastAndroid,
   Linking,
+  TouchableOpacity,
 } from 'react-native';
-import {Button, Text, Portal, Modal, Card, useTheme} from 'react-native-paper';
+import {
+  Button,
+  Text,
+  Portal,
+  Modal,
+  Card,
+  useTheme,
+  IconButton,
+} from 'react-native-paper';
 import Spinner from '../components/Spinner';
 import {useIsFocused} from '@react-navigation/native';
 import RNRestart from 'react-native-restart';
@@ -322,16 +331,20 @@ function HomeScreen({navigation, route}) {
                   _authentication.current._xal
                     .getRedirectUri()
                     .then(redirectObj => {
-                      setLoading(false);
-                      log.info('Redirect:', redirectObj);
-                      _redirect.current = redirectObj;
-                      dispatch({
-                        type: 'SET_REDIRECT',
-                        payload: redirectObj,
-                      });
-                      setShowLogin(true);
-                      setShowMsalLogin(false);
-                      setShowMsal(false);
+                      if (redirectObj && redirectObj.sisuAuth && redirectObj.sisuAuth.MsaOauthRedirect) {
+                        setLoading(false);
+                        log.info('Redirect:', redirectObj);
+                        _redirect.current = redirectObj;
+                        dispatch({
+                          type: 'SET_REDIRECT',
+                          payload: redirectObj,
+                        });
+                        setShowLogin(true);
+                        setShowMsalLogin(false);
+                        setShowMsal(false);
+                      } else {
+                        throw new Error('Sisu auth redirect URL missing');
+                      }
                     })
                     .catch(() => {
                       _authentication.current = new MsalAuthentication(
@@ -703,10 +716,85 @@ function HomeScreen({navigation, route}) {
           <ScrollView
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}>
-            <View style={[styles.blockTitle]}>
-              <Text variant="titleLarge" style={styles.blockTitleText}>
-                {t('Consoles')}
-              </Text>
+            {/* Top Dashboard Header */}
+            <View style={styles.dashboardHeader}>
+              <View style={styles.brandContainer}>
+                <View style={styles.brandTitleRow}>
+                  <Text
+                    variant="headlineSmall"
+                    style={[
+                      styles.brandTitle,
+                      theme.dark
+                        ? styles.brandTitleDark
+                        : styles.brandTitleLight,
+                    ]}>
+                    XStreaming
+                  </Text>
+                  <View style={styles.brandDot} />
+                </View>
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.brandSubtitle,
+                    theme.dark
+                      ? styles.brandSubtitleDark
+                      : styles.brandSubtitleLight,
+                  ]}>
+                  Xbox Remote Play & Cloud
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleRefreshConsoles}
+                style={[
+                  styles.headerRefreshBtn,
+                  theme.dark
+                    ? styles.headerRefreshBtnDark
+                    : styles.headerRefreshBtnLight,
+                ]}>
+                <IconButton
+                  icon="refresh"
+                  size={20}
+                  iconColor={theme.dark ? '#86EFAC' : '#107C10'}
+                  style={styles.refreshIconInner}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Consoles Section */}
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <View style={styles.accentBar} />
+                <Text
+                  variant="titleLarge"
+                  style={[
+                    styles.sectionTitleText,
+                    theme.dark ? styles.textDark : styles.textLight,
+                  ]}>
+                  {t('Consoles')}
+                </Text>
+              </View>
+
+              {consoles.length > 0 && (
+                <View
+                  style={[
+                    styles.countBadge,
+                    theme.dark
+                      ? styles.countBadgeDark
+                      : styles.countBadgeLight,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.countBadgeText,
+                      theme.dark
+                        ? styles.countBadgeTextDark
+                        : styles.countBadgeTextLight,
+                    ]}>
+                    {consoles.length}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {consoles.length > 0 ? (
@@ -743,11 +831,29 @@ function HomeScreen({navigation, route}) {
             ) : (
               <View style={styles.noConsoles}>
                 <View style={emptyConsoleCardStyle}>
+                  <View style={styles.emptyIconCircle}>
+                    <IconButton
+                      icon="microsoft-xbox"
+                      size={32}
+                      iconColor={theme.dark ? '#6EEB83' : '#107C10'}
+                      style={{margin: 0}}
+                    />
+                  </View>
+                  <Text
+                    variant="titleMedium"
+                    style={[
+                      styles.emptyConsoleTitle,
+                      theme.dark ? styles.textDark : styles.textLight,
+                    ]}>
+                    {t('Consoles')}
+                  </Text>
                   <Text style={styles.emptyConsoleDesc}>{t('NoConsoles')}</Text>
                   <View style={styles.emptyConsoleActions}>
                     <Button
-                      mode="contained-tonal"
+                      mode="contained"
+                      icon="refresh"
                       style={styles.emptyActionBtn}
+                      labelStyle={styles.emptyActionBtnLabel}
                       onPress={handleRefreshConsoles}>
                       {t('Refresh')}
                     </Button>
@@ -756,17 +862,26 @@ function HomeScreen({navigation, route}) {
               </View>
             )}
 
-            <View style={styles.blockTitle}>
-              <Text variant="titleLarge" style={styles.blockTitleText}>
-                {t('More')}
-              </Text>
+            {/* More Section */}
+            <View style={[styles.sectionHeader, styles.mt16]}>
+              <View style={styles.sectionTitleRow}>
+                <View style={[styles.accentBar, {backgroundColor: '#38BDF8'}]} />
+                <Text
+                  variant="titleLarge"
+                  style={[
+                    styles.sectionTitleText,
+                    theme.dark ? styles.textDark : styles.textLight,
+                  ]}>
+                  {t('More')}
+                </Text>
+              </View>
             </View>
 
             <View style={styles.moreItems}>
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '15%' : width / 2 - 40},
+                  {width: width > 600 ? '22%' : (width - 56) / 2},
                 ]}>
                 <HomeItem
                   title={t('Xcloud')}
@@ -779,7 +894,7 @@ function HomeScreen({navigation, route}) {
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '15%' : width / 2 - 40},
+                  {width: width > 600 ? '22%' : (width - 56) / 2},
                 ]}>
                 <HomeItem
                   title={t('Achivements')}
@@ -792,7 +907,20 @@ function HomeScreen({navigation, route}) {
               <View
                 style={[
                   styles.moreItem,
-                  {width: width > 600 ? '15%' : width / 2 - 40},
+                  {width: width > 600 ? '22%' : (width - 56) / 2},
+                ]}>
+                <HomeItem
+                  title={t('GamepadTestTitle')}
+                  icon={'gamepad-variant-outline'}
+                  color={'#10B981'}
+                  onPress={() => navigation.navigate('GamepadTest')}
+                />
+              </View>
+
+              <View
+                style={[
+                  styles.moreItem,
+                  {width: width > 600 ? '22%' : (width - 56) / 2},
                 ]}>
                 <HomeItem
                   title={t('Settings')}
@@ -857,71 +985,75 @@ const styles = StyleSheet.create({
     width: 250,
   },
   noConsoles: {
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   emptyConsoleCard: {
-    borderRadius: 18,
-    padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.68)',
+    borderRadius: 22,
+    padding: 24,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.56)',
+    borderColor: 'rgba(226, 232, 240, 0.85)',
     overflow: 'hidden',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 10,
+      height: 8,
     },
     shadowOpacity: 0.12,
-    shadowRadius: 24,
+    shadowRadius: 20,
   },
   emptyConsoleCardDark: {
-    backgroundColor: 'rgba(18, 20, 32, 0.84)',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(18, 22, 34, 0.88)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     shadowOpacity: 0.32,
   },
-  emptyConsoleHeader: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    marginBottom: 10,
+  emptyIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(16, 124, 16, 0.18)',
+    backgroundColor: 'rgba(16, 124, 16, 0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(16, 124, 16, 0.5)',
-  },
-  emptyConsoleMark: {
-    color: '#8BC34A',
-    fontWeight: '700',
-    fontSize: 16,
-    lineHeight: 18,
+    borderColor: 'rgba(16, 124, 16, 0.3)',
+    marginBottom: 14,
   },
   emptyConsoleTitle: {
-    marginBottom: 8,
+    fontWeight: '800',
+    fontSize: 17,
+    marginBottom: 6,
   },
   emptyConsoleDesc: {
-    opacity: 0.88,
+    opacity: 0.75,
     lineHeight: 20,
-    marginBottom: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+    maxWidth: 320,
   },
   emptyConsoleActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   emptyActionBtn: {
-    marginRight: 10,
+    borderRadius: 14,
+    backgroundColor: '#107C10',
+    elevation: 2,
+  },
+  emptyActionBtnLabel: {
+    fontWeight: '800',
+    color: '#FFFFFF',
+    paddingHorizontal: 10,
   },
   consoleList: {
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingHorizontal: 8,
     paddingBottom: 10,
   },
   listContainer: {},
   consoleItem: {
-    padding: 10,
+    padding: 8,
   },
   listItemH: {
     width: '25%',
@@ -931,32 +1063,139 @@ const styles = StyleSheet.create({
     width: '50%',
     justifyContent: 'center',
   },
-  blockTitle: {
-    paddingLeft: 20,
-    paddingRight: 10,
-    paddingBottom: 10,
-    marginBottom: 10,
+  dashboardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 20,
   },
-  blockTitleText: {
-    paddingBottom: 3,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255, 255, 255, .1)',
+  brandContainer: {
+    flexDirection: 'column',
+  },
+  brandTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandTitle: {
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  brandTitleLight: {
+    color: '#0F172A',
+  },
+  brandTitleDark: {
+    color: '#F8FAFC',
+  },
+  brandDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#107C10',
+    marginLeft: 6,
+    marginTop: 4,
+  },
+  brandSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginTop: 2,
+  },
+  brandSubtitleLight: {
+    color: '#64748B',
+  },
+  brandSubtitleDark: {
+    color: '#94A3B8',
+  },
+  headerRefreshBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerRefreshBtnLight: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(203, 213, 225, 0.7)',
+  },
+  headerRefreshBtnDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  refreshIconInner: {
+    margin: 0,
+    padding: 0,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    marginBottom: 12,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  accentBar: {
+    width: 4,
+    height: 18,
+    borderRadius: 2,
+    backgroundColor: '#107C10',
+    marginRight: 10,
+  },
+  sectionTitleText: {
+    fontWeight: '800',
+    fontSize: 19,
+    letterSpacing: 0.3,
+  },
+  textLight: {
+    color: '#0F172A',
+  },
+  textDark: {
+    color: '#F8FAFC',
+  },
+  countBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  countBadgeLight: {
+    backgroundColor: 'rgba(16, 124, 16, 0.1)',
+    borderColor: 'rgba(16, 124, 16, 0.25)',
+  },
+  countBadgeDark: {
+    backgroundColor: 'rgba(110, 235, 131, 0.12)',
+    borderColor: 'rgba(110, 235, 131, 0.25)',
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  countBadgeTextLight: {
+    color: '#107C10',
+  },
+  countBadgeTextDark: {
+    color: '#86EFAC',
   },
   moreItems: {
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingHorizontal: 16,
     paddingBottom: 40,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
   },
   moreItem: {
-    width: '15%',
-    marginRight: 20,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   mt10: {
     marginTop: 10,
+  },
+  mt16: {
+    marginTop: 16,
   },
 });
 

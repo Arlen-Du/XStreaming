@@ -7,7 +7,7 @@ import {
   NativeModules,
   ToastAndroid,
 } from 'react-native';
-import {Text, useTheme} from 'react-native-paper';
+import {Text, useTheme, Card, Icon} from 'react-native-paper';
 import Spinner from '../components/Spinner';
 import {getSettings, resetSettings} from '../store/settingStore';
 import SettingItem from '../components/SettingItem';
@@ -138,362 +138,447 @@ function SettingsScreen({navigation}) {
     }, 1000);
   };
 
+  const renderSectionCard = (
+    icon: string,
+    iconColor: string,
+    title: string,
+    children: React.ReactNode,
+  ) => (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <View
+          style={[
+            styles.sectionIconHalo,
+            {backgroundColor: `${iconColor}18`, borderColor: `${iconColor}35`},
+          ]}>
+          <Icon source={icon} size={18} color={iconColor} />
+        </View>
+        <Text
+          variant="titleMedium"
+          style={[
+            styles.sectionTitle,
+            theme.dark ? styles.sectionTitleDark : styles.sectionTitleLight,
+          ]}>
+          {title}
+        </Text>
+      </View>
+
+      <Card
+        mode="contained"
+        style={[
+          styles.islandCard,
+          theme.dark ? styles.islandCardDark : styles.islandCardLight,
+        ]}>
+        {children}
+      </Card>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Spinner loading={loading} text={t('Loading...')} />
 
-      <ScrollView>
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              ⚙️ {t('BasesSettings')}
-            </Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* User Status Card */}
+        {isAuthed && user ? (
+          <View
+            style={[
+              styles.userCard,
+              theme.dark ? styles.islandCardDark : styles.islandCardLight,
+            ]}>
+            <View style={styles.userRow}>
+              <View style={styles.userAvatarWrapper}>
+                <Icon source="microsoft-xbox" size={24} color="#107C10" />
+              </View>
+              <View style={styles.userInfo}>
+                <Text
+                  variant="titleMedium"
+                  style={[
+                    styles.userName,
+                    theme.dark ? styles.textDark : styles.textLight,
+                  ]}>
+                  {user}
+                </Text>
+                <View style={styles.onlinePill}>
+                  <View style={styles.onlineDot} />
+                  <Text style={styles.onlineText}>{t('Success')}</Text>
+                </View>
+              </View>
+            </View>
           </View>
+        ) : null}
 
-          {bases.map((meta, idx) => {
-            return (
+        {/* Bases Settings */}
+        {renderSectionCard(
+          'cog',
+          '#107C10',
+          t('BasesSettings'),
+          bases.map((meta, idx) => (
+            <SettingItem
+              key={meta.name || idx}
+              title={meta.title}
+              description={meta.description}
+              showDivider={idx < bases.length - 1}
+              onPress={() => handleItemPress(meta.name)}
+            />
+          )),
+        )}
+
+        {/* Display Settings */}
+        {renderSectionCard(
+          'monitor',
+          '#0284C7',
+          t('DisplaySettings'),
+          <>
+            {display.map((meta, idx) => (
               <SettingItem
                 key={meta.name || idx}
                 title={meta.title}
                 description={meta.description}
+                showDivider={true}
                 onPress={() => handleItemPress(meta.name)}
               />
-            );
-          })}
-        </View>
+            ))}
+            <SettingItem
+              title={t('Display')}
+              description={t(
+                'Set parameters such as screen clarity and saturation',
+              )}
+              showDivider={false}
+              onPress={() => {
+                const currentSettings = getSettings();
+                if (
+                  currentSettings.render_engine === 'native' ||
+                  currentSettings.render_engine === 'nano'
+                ) {
+                  Alert.alert(
+                    t('Display settings is not working in native render engine.'),
+                  );
+                  return;
+                }
+                navigation.navigate('Display');
+              }}
+            />
+          </>,
+        )}
 
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              🖥️ {t('DisplaySettings')}
-            </Text>
-          </View>
-
-          {display.map((meta, idx) => {
-            return (
+        {/* Gamepad Settings */}
+        {renderSectionCard(
+          'gamepad-variant',
+          '#8B5CF6',
+          t('GamepadSettings'),
+          <>
+            {gamepad.map((meta, idx) => (
               <SettingItem
                 key={meta.name || idx}
                 title={meta.title}
                 description={meta.description}
+                showDivider={true}
                 onPress={() => handleItemPress(meta.name)}
               />
-            );
-          })}
+            ))}
+            <SettingItem
+              title={t('GamepadTestTitle')}
+              description={t('GamepadTestDescription')}
+              showDivider={false}
+              onPress={() => {
+                navigation.navigate('GamepadTest');
+              }}
+            />
+          </>,
+        )}
 
-          <SettingItem
-            title={t('Display')}
-            description={t(
-              'Set parameters such as screen clarity and saturation',
+        {/* Virtual Gamepad Settings */}
+        {renderSectionCard(
+          'tune-variant',
+          '#06B6D4',
+          t('vGamepadSettings'),
+          <>
+            {vgamepad.map((meta, idx) => (
+              <SettingItem
+                key={meta.name || idx}
+                title={meta.title}
+                description={meta.description}
+                showDivider={true}
+                onPress={() => handleItemPress(meta.name)}
+              />
+            ))}
+            <SettingItem
+              title={t('Customize virtual buttons')}
+              description={t('Customize buttons of virtual gamepad')}
+              showDivider={true}
+              onPress={() => {
+                navigation.navigate('VirtualGamepadSettings');
+              }}
+            />
+            <SettingItem
+              title={t('Auto toggle hold buttons')}
+              description={t('Select what buttons become toggle holdable')}
+              showDivider={true}
+              onPress={() => {
+                navigation.navigate('HoldButtons');
+              }}
+            />
+            <SettingItem
+              title={t('Virtual macro settings')}
+              description={t('Enable macro button and edit its action sequence')}
+              showDivider={false}
+              onPress={() => {
+                navigation.navigate('VirtualMacroSettings');
+              }}
+            />
+          </>,
+        )}
+
+        {/* Audio Settings */}
+        {renderSectionCard(
+          'volume-high',
+          '#F59E0B',
+          t('AudioSettings'),
+          audio.map((meta, idx) => (
+            <SettingItem
+              key={meta.name || idx}
+              title={meta.title}
+              description={meta.description}
+              showDivider={idx < audio.length - 1}
+              onPress={() => handleItemPress(meta.name)}
+            />
+          )),
+        )}
+
+        {/* Cloud Gaming Settings */}
+        {renderSectionCard(
+          'cloud',
+          '#EAB308',
+          t('XcloudSettings'),
+          xcloud.map((meta, idx) => (
+            <SettingItem
+              key={meta.name || idx}
+              title={meta.title}
+              description={meta.description}
+              showDivider={idx < xcloud.length - 1}
+              onPress={() => handleItemPress(meta.name)}
+            />
+          )),
+        )}
+
+        {/* Console / XHome Settings */}
+        {renderSectionCard(
+          'home-variant',
+          '#10B981',
+          t('XchomeSettings'),
+          xhome.map((meta, idx) => (
+            <SettingItem
+              key={meta.name || idx}
+              title={meta.title}
+              description={meta.description}
+              showDivider={idx < xhome.length - 1}
+              onPress={() => handleItemPress(meta.name)}
+            />
+          )),
+        )}
+
+        {/* Sensor Settings */}
+        {renderSectionCard(
+          'axis-arrow',
+          '#EC4899',
+          t('SensorSettings'),
+          sensor.map((meta, idx) => (
+            <SettingItem
+              key={meta.name || idx}
+              title={meta.title}
+              description={meta.description}
+              showDivider={idx < sensor.length - 1}
+              onPress={() => handleItemPress(meta.name)}
+            />
+          )),
+        )}
+
+        {/* DualSense Trigger Settings */}
+        {renderSectionCard(
+          'controller-classic',
+          '#3B82F6',
+          t('DualSense'),
+          <>
+            <SettingItem
+              title={t('DualSense_adaptive_trigger_left')}
+              description={`${t('DualSense_adaptive_trigger_left_desc')}`}
+              showDivider={true}
+              onPress={() =>
+                navigation.navigate({
+                  name: 'Ds5',
+                  params: {
+                    type: 'left',
+                  },
+                })
+              }
+            />
+            <SettingItem
+              title={t('DualSense_adaptive_trigger_right')}
+              description={`${t('DualSense_adaptive_trigger_right_desc')}`}
+              showDivider={false}
+              onPress={() =>
+                navigation.navigate({
+                  name: 'Ds5',
+                  params: {
+                    type: 'right',
+                  },
+                })
+              }
+            />
+          </>,
+        )}
+
+        {/* TURN Server Settings */}
+        {renderSectionCard(
+          'server-network',
+          '#14B8A6',
+          t('TurnServerSettings'),
+          <>
+            {server.map((meta, idx) => (
+              <SettingItem
+                key={meta.name || idx}
+                title={meta.title}
+                description={meta.description}
+                showDivider={true}
+                onPress={() => handleItemPress(meta.name)}
+              />
+            ))}
+            <SettingItem
+              title={t('TURN server')}
+              description={t('Custom TURN server')}
+              showDivider={false}
+              onPress={() => navigation.navigate('Server')}
+            />
+          </>,
+        )}
+
+        {/* General & Community Settings */}
+        {renderSectionCard(
+          'dots-horizontal-circle',
+          '#64748B',
+          t('Others'),
+          <>
+            {others.map((meta, idx) => (
+              <SettingItem
+                key={meta.name || idx}
+                title={meta.title}
+                description={meta.description}
+                showDivider={true}
+                onPress={() => handleItemPress(meta.name)}
+              />
+            ))}
+
+            <SettingItem
+              title={t('ConfigTransfer')}
+              description={t('ConfigTransferDescription')}
+              showDivider={true}
+              onPress={() => navigation.navigate('Transfer')}
+            />
+
+            <SettingItem
+              title={t('Device testing')}
+              description={t('Testing current device and controller')}
+              showDivider={true}
+              onPress={() => navigation.navigate('DeviceInfos')}
+            />
+
+            <SettingItem
+              title={t('About')}
+              description={`${t('About XStreaming')}`}
+              showDivider={true}
+              onPress={() => {
+                if (currentLanguage === 'zh' || currentLanguage === 'zht') {
+                  navigation.navigate('AboutZh');
+                } else {
+                  navigation.navigate('About');
+                }
+              }}
+            />
+
+            {(currentLanguage === 'zh' || currentLanguage === 'zht') && (
+              <SettingItem
+                title={'支持及交流'}
+                description={'支持开发或交流使用心得'}
+                showDivider={true}
+                onPress={() => navigation.navigate('Feedback')}
+              />
             )}
-            onPress={() => {
-              const settings = getSettings();
-              if (
-                settings.render_engine === 'native' ||
-                settings.render_engine === 'nano'
-              ) {
-                Alert.alert(
-                  t('Display settings is not working in native render engine.'),
-                );
-                return;
-              }
-              navigation.navigate('Display');
-            }}
-          />
-        </View>
 
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              🎮 {t('GamepadSettings')}
-            </Text>
-          </View>
-
-          {gamepad.map((meta, idx) => {
-            return (
+            {__DEV__ && (
               <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
+                title={'DEBUG'}
+                description={'Enter debug'}
+                showDivider={true}
+                onPress={() => handleItemPress('debug')}
               />
-            );
-          })}
+            )}
 
-          <SettingItem
-            title={t('GamepadTestTitle')}
-            description={t('GamepadTestDescription')}
-            onPress={() => {
-              navigation.navigate('GamepadTest');
-            }}
-          />
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              🧩 {t('vGamepadSettings')}
-            </Text>
-          </View>
-
-          {vgamepad.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-
-          <SettingItem
-            title={t('Customize virtual buttons')}
-            description={t('Customize buttons of virtual gamepad')}
-            onPress={() => {
-              navigation.navigate('VirtualGamepadSettings');
-            }}
-          />
-
-          <SettingItem
-            title={t('Auto toggle hold buttons')}
-            description={t('Select what buttons become toggle holdable')}
-            onPress={() => {
-              navigation.navigate('HoldButtons');
-            }}
-          />
-
-          <SettingItem
-            title={t('Virtual macro settings')}
-            description={t('Enable macro button and edit its action sequence')}
-            onPress={() => {
-              navigation.navigate('VirtualMacroSettings');
-            }}
-          />
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              🔊 {t('AudioSettings')}
-            </Text>
-          </View>
-
-          {audio.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              ☁️ {t('XcloudSettings')}
-            </Text>
-          </View>
-
-          {xcloud.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              {t('XchomeSettings')}
-            </Text>
-          </View>
-
-          {xhome.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              {t('SensorSettings')}
-            </Text>
-          </View>
-
-          {sensor.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              {t('DualSense')}
-            </Text>
-          </View>
-
-          <SettingItem
-            title={t('DualSense_adaptive_trigger_left')}
-            description={`${t('DualSense_adaptive_trigger_left_desc')}`}
-            onPress={() =>
-              navigation.navigate({
-                name: 'Ds5',
-                params: {
-                  type: 'left',
-                },
-              })
-            }
-          />
-
-          <SettingItem
-            title={t('DualSense_adaptive_trigger_right')}
-            description={`${t('DualSense_adaptive_trigger_right_desc')}`}
-            onPress={() =>
-              navigation.navigate({
-                name: 'Ds5',
-                params: {
-                  type: 'right',
-                },
-              })
-            }
-          />
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              🌐 {t('TurnServerSettings')}
-            </Text>
-          </View>
-
-          {server.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-          <SettingItem
-            title={t('TURN server')}
-            description={t('Custom TURN server')}
-            onPress={() => navigation.navigate('Server')}
-          />
-        </View>
-
-        <View>
-          <View style={styles.contentTitle}>
-            <Text variant="titleLarge" style={titleTextStyle}>
-              {t('Others')}
-            </Text>
-          </View>
-
-          {others.map((meta, idx) => {
-            return (
-              <SettingItem
-                key={meta.name || idx}
-                title={meta.title}
-                description={meta.description}
-                onPress={() => handleItemPress(meta.name)}
-              />
-            );
-          })}
-
-          <SettingItem
-            title={t('Clear Cache')}
-            description={t('Clear XStreaming Cache Data(Keep login data)')}
-            onPress={() => handleClearCache()}
-          />
-
-          <SettingItem
-            title={t('ConfigTransfer')}
-            description={t('ConfigTransferDescription')}
-            onPress={() => navigation.navigate('Transfer')}
-          />
-
-          <SettingItem
-            title={t('Device testing')}
-            description={t('Testing current device and controller')}
-            onPress={() => navigation.navigate('DeviceInfos')}
-          />
-
-          <SettingItem
-            title={t('About')}
-            description={`${t('About XStreaming')}`}
-            onPress={() => {
-              if (currentLanguage === 'zh' || currentLanguage === 'zht') {
-                navigation.navigate('AboutZh');
-              } else {
-                navigation.navigate('About');
-              }
-            }}
-          />
-          {(currentLanguage === 'zh' || currentLanguage === 'zht') && (
             <SettingItem
-              title={'支持及交流'}
-              description={'支持开发或交流使用心得'}
-              onPress={() => navigation.navigate('Feedback')}
+              title={t('HistoryTitle')}
+              description={`${t('HistoryDesc')}`}
+              showDivider={true}
+              onPress={() => navigation.navigate('History')}
             />
-          )}
 
-          {__DEV__ && (
             <SettingItem
-              title={'DEBUG'}
-              description={'Enter debug'}
-              onPress={() => handleItemPress('debug')}
+              title={t('Thanks')}
+              showDivider={false}
+              onPress={() => navigation.navigate('Thanks')}
             />
-          )}
+          </>,
+        )}
 
-          <SettingItem
-            title={t('HistoryTitle')}
-            description={`${t('HistoryDesc')}`}
-            onPress={() => navigation.navigate('History')}
-          />
-
-          <SettingItem
-            title={t('Thanks')}
-            onPress={() => navigation.navigate('Thanks')}
-          />
-
-          {isAuthed ? (
+        {/* Account & Maintenance (Danger Zone) */}
+        {renderSectionCard(
+          'shield-alert-outline',
+          '#EF4444',
+          t('Profile'),
+          <>
             <SettingItem
-              title={t('Logout')}
-              description={user ? `${t('Current user')}: ${user}` : ''}
-              onPress={() => handleItemPress('logout')}
+              title={t('Clear Cache')}
+              description={t('Clear XStreaming Cache Data(Keep login data)')}
+              leftIcon="trash-can-outline"
+              leftIconColor="#F59E0B"
+              showDivider={isAuthed}
+              onPress={() => handleClearCache()}
             />
-          ) : null}
-        </View>
 
+            {isAuthed ? (
+              <SettingItem
+                title={t('Logout')}
+                description={user ? `${t('Current user')}: ${user}` : ''}
+                leftIcon="logout"
+                leftIconColor="#EF4444"
+                isDestructive={true}
+                showDivider={false}
+                onPress={() => handleItemPress('logout')}
+              />
+            ) : null}
+          </>,
+        )}
+
+        {/* App Version Footer */}
         <View style={styles.version}>
-          <Text style={styles.versionText} variant="titleMedium">
-            {t('Version')}: v{pkg.version}
-          </Text>
-          <Text style={styles.versionText} variant="titleSmall">
-            © 2024-{new Date().getFullYear()} Geocld
+          <View
+            style={[
+              styles.versionBadge,
+              theme.dark ? styles.versionBadgeDark : styles.versionBadgeLight,
+            ]}>
+            <Text
+              style={[
+                styles.versionText,
+                theme.dark ? styles.textDark : styles.textLight,
+              ]}>
+              XStreaming v{pkg.version}
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.copyrightText,
+              theme.dark ? styles.textMutedDark : styles.textMutedLight,
+            ]}>
+            © 2024-{new Date().getFullYear()} Geocld · Open Source
           </Text>
         </View>
       </ScrollView>
@@ -504,26 +589,152 @@ function SettingsScreen({navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
-  backdrop: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  scrollContent: {
+    paddingTop: 12,
+    paddingBottom: 40,
   },
-  contentTitle: {
-    padding: 15,
-    paddingBottom: 0,
+  userCard: {
+    marginHorizontal: 16,
+    marginBottom: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+    elevation: 3,
   },
-  titleText: {
-    color: '#fff',
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userAvatarWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(16, 124, 16, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 124, 16, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  onlinePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  onlineDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+    marginRight: 5,
+  },
+  onlineText: {
+    fontSize: 11,
+    color: '#10B981',
+    fontWeight: '700',
+  },
+  sectionContainer: {
+    marginBottom: 20,
+    paddingHorizontal: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 4,
+  },
+  sectionIconHalo: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  sectionTitle: {
+    fontWeight: '800',
+    fontSize: 16,
+    letterSpacing: 0.2,
+  },
+  sectionTitleLight: {
+    color: '#0F172A',
+  },
+  sectionTitleDark: {
+    color: '#F8FAFC',
+  },
+  islandCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+  },
+  islandCardLight: {
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    borderColor: 'rgba(226, 232, 240, 0.85)',
+  },
+  islandCardDark: {
+    backgroundColor: 'rgba(18, 22, 34, 0.88)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    shadowOpacity: 0.35,
   },
   version: {
-    paddingTop: 20,
-    paddingBottom: 50,
-    textAlign: 'center',
+    paddingTop: 16,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  versionBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 6,
+  },
+  versionBadgeLight: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(203, 213, 225, 0.7)',
+  },
+  versionBadgeDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   versionText: {
-    textAlign: 'center',
-    paddingTop: 10,
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.3,
+  },
+  copyrightText: {
+    fontSize: 11,
+  },
+  textLight: {
+    color: '#0F172A',
+  },
+  textDark: {
+    color: '#F8FAFC',
+  },
+  textMutedLight: {
+    color: '#64748B',
+  },
+  textMutedDark: {
+    color: '#94A3B8',
   },
 });
 
 export default SettingsScreen;
+

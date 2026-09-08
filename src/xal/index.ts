@@ -149,7 +149,7 @@ export default class Xal {
     codeChallange: CodeChallenge,
     state: string,
   ): Promise<Record<string, any>> {
-    return new Promise<Record<string, any>>(resolve => {
+    return new Promise<Record<string, any>>((resolve, reject) => {
       const payload = {
         AppId: this._app.AppId,
         TitleId: this._app.TitleId,
@@ -195,6 +195,7 @@ export default class Xal {
         .catch((e: any) => {
           console.log('error:', e);
           log.error('[doSisuAuthentication] error:', e);
+          reject(e);
         });
     });
   }

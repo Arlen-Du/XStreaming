@@ -194,6 +194,25 @@ tasks.register("syncNanoRustJniLibs") {
     inputs.property("xstreamingTargetAbis", xstreamingTargetAbis.join(","))
     outputs.dir(outputDir)
     doLast {
+        def cargoInstalled = false
+        try {
+            def stdout = new ByteArrayOutputStream()
+            exec {
+                commandLine "cargo", "--version"
+                standardOutput = stdout
+                errorOutput = new ByteArrayOutputStream()
+                ignoreExitValue = true
+            }
+            cargoInstalled = (stdout.toString().trim().length() > 0)
+        } catch (Exception ignored) {
+            cargoInstalled = false
+        }
+
+        if (!cargoInstalled) {
+            logger.warn("[syncNanoRustJniLibs] 'cargo' not found in PATH. Skipping nano-rs build. Native (SDL) and Web engines remain fully functional.")
+            return
+        }
+
         def ndkDir = android.ndkDirectory
         if (ndkDir == null || !ndkDir.exists()) {
             throw new GradleException("Android NDK directory not found")

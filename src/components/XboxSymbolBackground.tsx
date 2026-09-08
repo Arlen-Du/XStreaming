@@ -117,8 +117,8 @@ const SYMBOLS: SymbolItem[] = [
 const usePalette = (isLight: boolean) => {
   if (isLight) {
     return {
-      start: '#FCFBFF',
-      mid: '#F5F1FF',
+      start: '#F8FAFC',
+      mid: '#F1F5F9',
       end: '#FFFFFF',
       washA: '#D8CCFF',
       washB: '#F6D9EA',
@@ -126,25 +126,25 @@ const usePalette = (isLight: boolean) => {
       symbol: '#107C10',
       symbolAlt: '#2E7D32',
       symbolText: '#0B4D10',
-      base: '#FCFBFF',
-      hazeOpacity: 0.34,
-      symbolBoost: 1,
+      base: '#F8FAFC',
+      hazeOpacity: 0.22,
+      symbolBoost: 0.85,
     };
   }
 
   return {
-    start: '#111320',
-    mid: '#1D1A32',
-    end: '#0D1018',
-    washA: '#7662D9',
-    washB: '#9D4778',
-    washC: '#328E82',
+    start: '#0E121E',
+    mid: '#141A29',
+    end: '#0A0D15',
+    washA: '#5846B5',
+    washB: '#823762',
+    washC: '#206B62',
     symbol: '#6EEB83',
     symbolAlt: '#20A64A',
     symbolText: '#B8FFC4',
-    base: '#111320',
-    hazeOpacity: 0.14,
-    symbolBoost: 1.25,
+    base: '#0E121E',
+    hazeOpacity: 0.09,
+    symbolBoost: 1.1,
   };
 };
 
