@@ -156,7 +156,6 @@ const usePalette = (isLight: boolean, primaryColor?: string) => {
     hazeOpacity: 0.09,
     symbolBoost: 1.1,
   };
-  };
 };
 
 const renderButton = (
