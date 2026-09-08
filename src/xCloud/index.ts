@@ -612,7 +612,7 @@ export default class XcloudApi {
               }
             }
 
-            // PerferIPV6
+            // PreferIPV6
             const _settings = getSettings();
             if (_settings.ipv6) {
               lst.sort((a, b) => {
@@ -622,6 +622,30 @@ export default class XcloudApi {
                 return !firstIp.includes(':') && secondIp.includes(':')
                   ? 1
                   : -1;
+              });
+            }
+
+            // Stream connect mode prioritization
+            const isPrivateIp = (ip: string) =>
+              /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|fc00:|fe80:)/i.test(
+                ip,
+              );
+
+            if (_settings.stream_connect_mode === 'local') {
+              lst.sort((a, b) => {
+                const aIsPrivate = isPrivateIp(a.ip);
+                const bIsPrivate = isPrivateIp(b.ip);
+                if (aIsPrivate && !bIsPrivate) return -1;
+                if (!aIsPrivate && bIsPrivate) return 1;
+                return 0;
+              });
+            } else if (_settings.stream_connect_mode === 'remote') {
+              lst.sort((a, b) => {
+                const aIsPrivate = isPrivateIp(a.ip);
+                const bIsPrivate = isPrivateIp(b.ip);
+                if (!aIsPrivate && bIsPrivate) return -1;
+                if (aIsPrivate && !bIsPrivate) return 1;
+                return 0;
               });
             }
 

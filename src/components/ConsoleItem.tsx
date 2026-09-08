@@ -21,7 +21,8 @@ import {useTranslation} from 'react-i18next';
 import {SvgXml} from 'react-native-svg';
 import NetInfo from '@react-native-community/netinfo';
 import icons from '../common/svg';
-import {getSettings} from '../store/settingStore';
+import {getSettings, saveSettings} from '../store/settingStore';
+import {ToastAndroid} from 'react-native';
 
 const ConsoleItem = (props: any) => {
   const {t} = useTranslation();
@@ -31,6 +32,33 @@ const ConsoleItem = (props: any) => {
   const [menuVisible, setMenuVisible] = React.useState(false);
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
+
+  const [streamMode, setStreamMode] = React.useState<'auto' | 'local' | 'remote'>(
+    settings.stream_connect_mode || 'auto',
+  );
+
+  const handleToggleStreamMode = (targetMode?: 'auto' | 'local' | 'remote') => {
+    let next: 'auto' | 'local' | 'remote';
+    if (targetMode) {
+      next = targetMode;
+    } else {
+      if (streamMode === 'auto') next = 'local';
+      else if (streamMode === 'local') next = 'remote';
+      else next = 'auto';
+    }
+
+    setStreamMode(next);
+    saveSettings({stream_connect_mode: next});
+
+    let msg = '';
+    if (next === 'local') msg = t('Switched to: Local direct');
+    else if (next === 'remote') msg = t('Switched to: Remote stream');
+    else msg = t('Switched to: Auto detect');
+
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    }
+  };
 
   const [netType, setNetType] = React.useState<string>('wifi');
   React.useEffect(() => {
@@ -112,67 +140,47 @@ const ConsoleItem = (props: any) => {
   };
 
   const renderNetworkBadge = () => {
-    // 列表卡片准确展示掌机/手机当前设备网络，不预判局域网直连还是远程穿透
-    let iconName = 'wifi';
-    let text = 'Wi-Fi';
-    let isPositive = true;
-    let isWarning = false;
-
-    if (netType === 'wifi') {
-      iconName = 'wifi';
-      text = 'Wi-Fi';
-      isPositive = true;
-    } else if (netType === 'ethernet') {
-      iconName = 'ethernet';
-      text = t('Ethernet');
-      isPositive = true;
-    } else if (netType === 'cellular') {
-      iconName = 'antenna';
-      text = t('Cellular');
-      isPositive = false;
-      isWarning = true;
+    let isLocal = false;
+    if (streamMode === 'local') {
+      isLocal = true;
+    } else if (streamMode === 'remote') {
+      isLocal = false;
     } else {
-      iconName = 'wifi-off';
-      text = t('No network');
-      isPositive = false;
+      // 自动检测模式：在 Wi-Fi 或有线局域网下判定为本地，蜂窝网络判定为远程
+      isLocal = netType === 'wifi' || netType === 'ethernet';
     }
 
-    const color = isPositive
+    const iconName = isLocal ? 'wifi' : 'earth';
+    const text = isLocal ? t('Local direct') : t('Remote stream');
+
+    const color = isLocal
       ? theme.dark
         ? '#34D399'
         : '#059669'
-      : isWarning
-      ? theme.dark
-        ? '#FBBF24'
-        : '#D97706'
-      : '#9CA3AF';
+      : theme.dark
+      ? '#60A5FA'
+      : '#2563EB';
 
-    const bgColor = isPositive
+    const bgColor = isLocal
       ? theme.dark
         ? 'rgba(16, 185, 129, 0.14)'
         : 'rgba(16, 185, 129, 0.1)'
-      : isWarning
-      ? theme.dark
-        ? 'rgba(245, 158, 11, 0.14)'
-        : 'rgba(245, 158, 11, 0.1)'
       : theme.dark
-      ? 'rgba(156, 163, 175, 0.14)'
-      : 'rgba(156, 163, 175, 0.1)';
+      ? 'rgba(59, 130, 246, 0.14)'
+      : 'rgba(37, 99, 235, 0.1)';
 
-    const borderColor = isPositive
+    const borderColor = isLocal
       ? theme.dark
         ? 'rgba(52, 211, 153, 0.32)'
         : 'rgba(16, 185, 129, 0.3)'
-      : isWarning
-      ? theme.dark
-        ? 'rgba(251, 191, 36, 0.32)'
-        : 'rgba(245, 158, 11, 0.28)'
       : theme.dark
-      ? 'rgba(156, 163, 175, 0.28)'
-      : 'rgba(156, 163, 175, 0.25)';
+      ? 'rgba(96, 165, 250, 0.32)'
+      : 'rgba(37, 99, 235, 0.28)';
 
     return (
-      <View
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => handleToggleStreamMode()}
         style={[
           styles.netBadge,
           isLandscape && styles.netBadgeLandscape,
@@ -187,7 +195,7 @@ const ConsoleItem = (props: any) => {
           ]}>
           {text}
         </Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -305,6 +313,36 @@ const ConsoleItem = (props: any) => {
                   props.onPoweroff && props.onPoweroff();
                 }}
                 title={t('Powered off')}
+              />
+              <Menu.Item
+                leadingIcon={
+                  streamMode === 'auto' ? 'check-circle' : 'circle-outline'
+                }
+                onPress={() => {
+                  closeMenu();
+                  handleToggleStreamMode('auto');
+                }}
+                title={t('Auto detect')}
+              />
+              <Menu.Item
+                leadingIcon={
+                  streamMode === 'local' ? 'check-circle' : 'circle-outline'
+                }
+                onPress={() => {
+                  closeMenu();
+                  handleToggleStreamMode('local');
+                }}
+                title={t('Local direct')}
+              />
+              <Menu.Item
+                leadingIcon={
+                  streamMode === 'remote' ? 'check-circle' : 'circle-outline'
+                }
+                onPress={() => {
+                  closeMenu();
+                  handleToggleStreamMode('remote');
+                }}
+                title={t('Remote stream')}
               />
             </Menu>
           </View>

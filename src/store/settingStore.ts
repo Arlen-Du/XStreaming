@@ -101,11 +101,13 @@ export type Settings = {
   enable_microphone: boolean;
   debug: boolean;
   show_session_report: boolean;
+  stream_connect_mode: 'auto' | 'local' | 'remote';
 };
 
 const defaultSettings: Settings = {
   locale: 'en',
   locale_follow_system: true,
+  stream_connect_mode: 'auto',
   resolution: 720,
   render_engine: 'native',
   xhome_bitrate_mode: 'auto',
