@@ -81,7 +81,6 @@ import TransferScreen from './pages/Transfer';
 import ThanksScreen from './pages/Thanks';
 import HistoryScreen from './pages/History';
 import ServerScreen from './pages/Server';
-import EasyTierScreen from './pages/EasyTier';
 import updater from './utils/updater';
 import getServer from './utils/get-server';
 import {
@@ -251,7 +250,6 @@ const TransferBackgroundScreen = withPageBackground(TransferScreen);
 const ThanksBackgroundScreen = withPageBackground(ThanksScreen);
 const HistoryBackgroundScreen = withPageBackground(HistoryScreen);
 const ServerBackgroundScreen = withPageBackground(ServerScreen);
-const EasyTierBackgroundScreen = withPageBackground(EasyTierScreen);
 const SearchBackgroundScreen = withPageBackground(SearchScreen);
 
 function App() {
@@ -646,11 +644,6 @@ function App() {
                   name="Server"
                   component={ServerBackgroundScreen}
                   options={{title: t('Server')}}
-                />
-                <RootStack.Screen
-                  name="EasyTier"
-                  component={EasyTierBackgroundScreen}
-                  options={{title: 'EasyTier'}}
                 />
                 <RootStack.Screen
                   name="GameMap"

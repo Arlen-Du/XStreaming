@@ -222,7 +222,6 @@ function SettingsScreen({navigation}) {
       list.push(() => handleItemPress(meta.name));
     });
     list.push(() => navigation.navigate('Server'));
-    list.push(() => navigation.navigate('EasyTier'));
     // others
     others.forEach(meta => {
       list.push(() => handleItemPress(meta.name));
@@ -582,12 +581,6 @@ function SettingsScreen({navigation}) {
             t('Custom TURN server'),
             () => navigation.navigate('Server'),
             'turn_server',
-          )}
-          {renderItem(
-            t('EasyTier Network') || 'EasyTier 虚拟组网',
-            t('EasyTier Virtual LAN for remote streaming') || '基于 EasyTier 的对等局域网异地串流',
-            () => navigation.navigate('EasyTier'),
-            'easytier',
           )}
         </React.Fragment>
 
