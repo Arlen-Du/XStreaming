@@ -114,11 +114,16 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('XSTREAMING_RELEASE_STORE_FILE')) {
+            if (project.hasProperty('XSTREAMING_RELEASE_STORE_FILE') && file(XSTREAMING_RELEASE_STORE_FILE).exists()) {
                 storeFile file(XSTREAMING_RELEASE_STORE_FILE)
                 storePassword XSTREAMING_RELEASE_STORE_PASSWORD
                 keyAlias XSTREAMING_RELEASE_KEY_ALIAS
                 keyPassword XSTREAMING_RELEASE_KEY_PASSWORD
+            } else {
+                storeFile file('debug.keystore')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
             }
         }
     }
@@ -194,6 +199,25 @@ tasks.register("syncNanoRustJniLibs") {
     inputs.property("xstreamingTargetAbis", xstreamingTargetAbis.join(","))
     outputs.dir(outputDir)
     doLast {
+        def hasCargo = false
+        try {
+            def stdout = new ByteArrayOutputStream()
+            exec {
+                commandLine "cargo", "--version"
+                standardOutput = stdout
+                errorOutput = stdout
+                ignoreExitValue = true
+            }
+            hasCargo = stdout.toString().contains("cargo")
+        } catch (Exception ignored) {
+            hasCargo = false
+        }
+
+        if (!hasCargo) {
+            logger.warn("Cargo (Rust) not found on system. Skipping nano-rs build.")
+            return
+        }
+
         def ndkDir = android.ndkDirectory
         if (ndkDir == null || !ndkDir.exists()) {
             throw new GradleException("Android NDK directory not found")

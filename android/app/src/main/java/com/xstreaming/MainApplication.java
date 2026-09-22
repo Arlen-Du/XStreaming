@@ -15,6 +15,7 @@ import com.oney.WebRTCModule.EglUtils;
 import com.oney.WebRTCModule.webrtcutils.H264AndSoftwareVideoEncoderFactory;
 import com.xstreaming.touchcontrols.AnalogStickPackage;
 import com.xstreaming.touchcontrols.ButtonViewPackage;
+import com.xstreaming.easytier.EasyTierPackage;
 import com.xstreaming.webrtc.LowLatencyVideoDecoderFactory;
 
 import android.media.AudioAttributes;
@@ -66,6 +67,7 @@ public class MainApplication extends Application implements ReactApplication {
             packages.add(new NativeInputDialogPackage());
             packages.add(new ConfigTransferPackage());
             packages.add(new ShortcutManagerPackage());
+            packages.add(new EasyTierPackage());
           return packages;
         }
 

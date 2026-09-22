@@ -45,6 +45,7 @@ import {
 } from '../store/consolesStore';
 import MsalAuth from '../components/MsalAuth';
 import SessionReportModal from '../components/SessionReportModal';
+import {launchEasyTierApp} from '../utils/easyTierBridge';
 
 const log = debugFactory('HomeScreen');
 
@@ -581,6 +582,19 @@ function HomeScreen({navigation, route}) {
     }
   }, [consoles.length, focusedSection]);
 
+  const handleLaunchEasyTier = React.useCallback(async () => {
+    try {
+      await launchEasyTierApp();
+    } catch (e: any) {
+      ToastAndroid.show(
+        e?.message ||
+          t('EasyTier Pro is not installed') ||
+          '未检测到已安装的 EasyTier Pro 应用',
+        ToastAndroid.LONG,
+      );
+    }
+  }, [t]);
+
   useGamepadNavigation({
     enabled:
       isFocused &&
@@ -597,7 +611,7 @@ function HomeScreen({navigation, route}) {
           setFocusedIndex(prev => prev + 1);
         }
       } else if (focusedSection === 'more') {
-        if (focusedIndex < 2) {
+        if (focusedIndex < 3) {
           setFocusedIndex(prev => prev + 1);
         }
       }
@@ -649,6 +663,8 @@ function HomeScreen({navigation, route}) {
         } else if (focusedIndex === 1) {
           navigation.navigate('Achivements');
         } else if (focusedIndex === 2) {
+          handleLaunchEasyTier();
+        } else if (focusedIndex === 3) {
           navigation.navigate('Settings');
         }
       }
@@ -670,7 +686,7 @@ function HomeScreen({navigation, route}) {
 
   // Focus navigation state for login buttons (when not logged in)
   const [focusedLoginBtn, setFocusedLoginBtn] = React.useState<
-    'login' | 'settings'
+    'login' | 'easytier' | 'settings'
   >('login');
   const [focusedHarmonyBtn, setFocusedHarmonyBtn] = React.useState<
     'dismiss' | 'install'
@@ -687,10 +703,16 @@ function HomeScreen({navigation, route}) {
       !sessionReport,
     priority: 5,
     onUp: () => {
-      setFocusedLoginBtn('login');
+      setFocusedLoginBtn(prev => {
+        if (prev === 'settings') return 'easytier';
+        return 'login';
+      });
     },
     onDown: () => {
-      setFocusedLoginBtn('settings');
+      setFocusedLoginBtn(prev => {
+        if (prev === 'login') return 'easytier';
+        return 'settings';
+      });
     },
     onSelect: () => {
       if (focusedLoginBtn === 'login') {
@@ -699,6 +721,8 @@ function HomeScreen({navigation, route}) {
         } else if (showMsalLogin) {
           handleMsalLogin();
         }
+      } else if (focusedLoginBtn === 'easytier') {
+        handleLaunchEasyTier();
       } else {
         navigation.navigate('Settings');
       }
@@ -885,6 +909,8 @@ function HomeScreen({navigation, route}) {
   const renderLogin = () => {
     const isLoginFocused =
       (isGamepadActive || Platform.isTV) && focusedLoginBtn === 'login';
+    const isEasyTierFocused =
+      (isGamepadActive || Platform.isTV) && focusedLoginBtn === 'easytier';
     const isSettingsFocused =
       (isGamepadActive || Platform.isTV) && focusedLoginBtn === 'settings';
 
@@ -907,6 +933,20 @@ function HomeScreen({navigation, route}) {
           style={[
             styles.loginButton,
             styles.mt10,
+            isEasyTierFocused && styles.actionButtonFocused,
+          ]}
+          icon="open-in-new"
+          mode={isEasyTierFocused ? 'contained' : 'outlined'}
+          buttonColor={isEasyTierFocused ? theme.colors.primary : undefined}
+          textColor={isEasyTierFocused ? '#FFFFFF' : undefined}
+          onPress={handleLaunchEasyTier}>
+          &nbsp;{t('EasyTier Pro')}&nbsp;
+        </Button>
+
+        <Button
+          style={[
+            styles.loginButton,
+            styles.mt10,
             isSettingsFocused && styles.actionButtonFocused,
           ]}
           mode={isSettingsFocused ? 'contained' : 'text'}
@@ -922,6 +962,8 @@ function HomeScreen({navigation, route}) {
   const renderMsalLogin = () => {
     const isLoginFocused =
       (isGamepadActive || Platform.isTV) && focusedLoginBtn === 'login';
+    const isEasyTierFocused =
+      (isGamepadActive || Platform.isTV) && focusedLoginBtn === 'easytier';
     const isSettingsFocused =
       (isGamepadActive || Platform.isTV) && focusedLoginBtn === 'settings';
 
@@ -938,6 +980,20 @@ function HomeScreen({navigation, route}) {
           loading={msalBtnLoading}
           onPress={handleMsalLogin}>
           &nbsp;{t('AuthLogin')}&nbsp;
+        </Button>
+
+        <Button
+          style={[
+            styles.loginButton,
+            styles.mt10,
+            isEasyTierFocused && styles.actionButtonFocused,
+          ]}
+          icon="open-in-new"
+          mode={isEasyTierFocused ? 'contained' : 'outlined'}
+          buttonColor={isEasyTierFocused ? theme.colors.primary : undefined}
+          textColor={isEasyTierFocused ? '#FFFFFF' : undefined}
+          onPress={handleLaunchEasyTier}>
+          &nbsp;{t('EasyTier Pro')}&nbsp;
         </Button>
 
         <Button
@@ -1009,10 +1065,19 @@ function HomeScreen({navigation, route}) {
               styles.scrollContent,
               (isGamepadActive || Platform.isTV) && {paddingBottom: 64},
             ]}>
-            <View style={[styles.blockTitle]}>
+            <View style={[styles.blockTitle, styles.blockTitleRow]}>
               <Text variant="titleLarge" style={styles.blockTitleText}>
                 {t('Consoles')}
               </Text>
+              <Button
+                mode="text"
+                icon="open-in-new"
+                compact
+                textColor={theme.colors.primary}
+                onPress={handleLaunchEasyTier}
+                style={styles.quickJumpBtn}>
+                {t('EasyTier Pro')}
+              </Button>
             </View>
 
             {consoles.length > 0 ? (
@@ -1136,6 +1201,27 @@ function HomeScreen({navigation, route}) {
                     (isGamepadActive || Platform.isTV) &&
                     focusedSection === 'more' &&
                     focusedIndex === 2
+                  }
+                  title={'EasyTier Pro'}
+                  icon={'lan-connect'}
+                  color={'#00A4EF'}
+                  onPress={handleLaunchEasyTier}
+                />
+              </View>
+
+              <View
+                style={[
+                  styles.moreItem,
+                  {width: width > 600 ? '15%' : width / 2 - 40},
+                  (isGamepadActive || Platform.isTV) &&
+                    focusedSection === 'more' &&
+                    focusedIndex === 3 && {zIndex: 99, overflow: 'visible'},
+                ]}>
+                <HomeItem
+                  isFocused={
+                    (isGamepadActive || Platform.isTV) &&
+                    focusedSection === 'more' &&
+                    focusedIndex === 3
                   }
                   title={t('Settings')}
                   icon={'cog-outline'}
@@ -1330,10 +1416,19 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     marginBottom: 10,
   },
+  blockTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 20,
+  },
   blockTitleText: {
     paddingBottom: 3,
     borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, .1)',
+  },
+  quickJumpBtn: {
+    marginRight: 0,
   },
   moreItems: {
     paddingLeft: 20,
